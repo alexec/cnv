@@ -1,11 +1,24 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
+import {Col, FormText} from "react-bootstrap";
+
 export class HelloWorld extends Component {
     render() {
         return (
-            <div className="hello-world">
-                <h1>Hello World</h1>
+            <div>
+                <Row>
+                    <Col >
+                        <FormText/>
+                    </Col>
+                    <Col>
+                        &larr; &rarr;
+                    </Col>
+                    <Col>
+                        <FormText/>
+                    </Col>
+                </Row>
             </div>
         );
     }
 }
+
 export default HelloWorld;

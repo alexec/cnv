@@ -2,8 +2,11 @@
 const path = require('path');
 module.exports = {
    entry: path.resolve(__dirname, 'src', 'index.jsx'),
+   devServer: {
+      contentBase: path.join(__dirname, 'dist')
+   },
    output: {
-      path: path.resolve(__dirname, 'output'),
+      path: path.resolve(__dirname, 'dist'),
       filename: 'bundle.js'
    },
    resolve: {
@@ -20,7 +23,11 @@ module.exports = {
          {
             test: /\.scss/,
             use: ['style-loader', 'css-loader', 'sass-loader']
-         }
+         },
+         {
+           test: /\.css$/i,
+           use: ['style-loader', 'css-loader'],
+         },
       ]
    }
 };
