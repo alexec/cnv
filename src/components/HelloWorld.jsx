@@ -1,22 +1,33 @@
 import React, {Component} from 'react';
-import {Col, FormText} from "react-bootstrap";
+import {Button, Col, Container, Row} from "react-bootstrap";
+import Form from "react-bootstrap/Form";
 
 export class HelloWorld extends Component {
+    detectType(s)  {
+        if (s.startsWith('{')) {
+            return 'json';
+        }
+        if (s.startsWith('[')) {
+            return 'json';
+        }
+    }
+
     render() {
         return (
-            <div>
-                <Row>
-                    <Col >
-                        <FormText/>
-                    </Col>
-                    <Col>
-                        &larr; &rarr;
-                    </Col>
-                    <Col>
-                        <FormText/>
-                    </Col>
-                </Row>
-            </div>
+            <Container>
+                <Form>
+                    <Row>
+                        <Col>
+                            <Form.Text as="textarea" rows="10"/>
+                            <Form.Text type='text' placeholder='...'/>
+                        </Col>
+                        <Col>
+                            <Form.Text as="textarea" rows="10" />
+                            <Form.Text type='text' placeholder='...'/>
+                        </Col>
+                    </Row>
+                </Form>
+            </Container>
         );
     }
 }
