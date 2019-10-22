@@ -10,6 +10,8 @@ import {
 } from "react-bootstrap";
 import YAML from "yaml";
 import JWT from "jsonwebtoken";
+import sha1 from "sha1";
+
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
@@ -67,6 +69,7 @@ export class Converter extends Component {
           text = JSON.stringify(JWT.decode(text));
           break;
         case "text":
+          case 'sha1':
           break;
         case "yaml":
           obj = YAML.parse(text);
@@ -84,6 +87,9 @@ export class Converter extends Component {
             obj = JSON.parse(text);
           }
           text = JSON.stringify(obj, null, 2);
+          break;
+        case "sha1":
+          text = sha1(text);
           break;
         case "text":
           break;
@@ -218,7 +224,7 @@ export class Converter extends Component {
                     </ButtonGroup>
                     <ButtonGroup>
                       <Button disabled>To:</Button>
-                      {["text", "json", "yaml", "base64", "jwt"].map(type => (
+                      {["json", "yaml", "base64", "sha1"].map(type => (
                         <Button
                           key={`button-convert-${i}-${type}`}
                           variant="secondary"
