@@ -52,6 +52,23 @@ export class Converter extends Component {
     return item;
   }
 
+  hexDecode(text) {
+    const hexes = text.match(/.{1,4}/g) || [];
+    let back = "";
+    for (let j = 0; j < hexes.length; j++) {
+      back += String.fromCharCode(parseInt(hexes[j], 16));
+    }
+    return back;
+  }
+
+  hexEncode(text) {
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+      result += ("000" + text.charCodeAt(i).toString(16)).slice(-4);
+    }
+    return result;
+  }
+
   convert(to) {
     let text = this.state.stack[0].value;
     let from = this.state.stack[0].type;
@@ -61,6 +78,9 @@ export class Converter extends Component {
       switch (from) {
         case "base64":
           text = atob(text);
+          break;
+        case "hex":
+          text = this.hexDecode(text);
           break;
         case "json":
           obj = JSON.parse(text);
@@ -84,6 +104,9 @@ export class Converter extends Component {
       switch (to) {
         case "base64":
           text = btoa(text);
+          break;
+        case "hex":
+          text = this.hexEncode(text);
           break;
         case "json":
           if (obj === null) {
@@ -212,39 +235,51 @@ export class Converter extends Component {
                   <ButtonToolbar className="justify-content-between">
                     <ButtonGroup>
                       <Button disabled>From:</Button>
-                      {["text", "json", "yaml", "base64", "jwt", "url"].map(
-                        type => (
-                          <Button
-                            key={`button-type-${i}-${type}`}
-                            variant={`${
-                              this.state.stack[i].type === type
-                                ? "primary"
-                                : "secondary"
-                            }`}
-                            onClick={() => {
-                              this.type(type);
-                            }}
-                          >
-                            {type}
-                          </Button>
-                        )
-                      )}
+                      {[
+                        "text",
+                        "json",
+                        "yaml",
+                        "hex",
+                        "base64",
+                        "jwt",
+                        "url"
+                      ].map(type => (
+                        <Button
+                          key={`button-type-${i}-${type}`}
+                          variant={`${
+                            this.state.stack[i].type === type
+                              ? "primary"
+                              : "secondary"
+                          }`}
+                          onClick={() => {
+                            this.type(type);
+                          }}
+                        >
+                          {type}
+                        </Button>
+                      ))}
                     </ButtonGroup>
                     <ButtonGroup>
                       <Button disabled>To:</Button>
-                      {["text", "json", "yaml", "base64", "sha1", "url"].map(
-                        type => (
-                          <Button
-                            key={`button-convert-${i}-${type}`}
-                            variant="secondary"
-                            onClick={() => {
-                              this.convert(type);
-                            }}
-                          >
-                            {type}
-                          </Button>
-                        )
-                      )}
+                      {[
+                        "text",
+                        "json",
+                        "yaml",
+                        "hex",
+                        "base64",
+                        "sha1",
+                        "url"
+                      ].map(type => (
+                        <Button
+                          key={`button-convert-${i}-${type}`}
+                          variant="secondary"
+                          onClick={() => {
+                            this.convert(type);
+                          }}
+                        >
+                          {type}
+                        </Button>
+                      ))}
                     </ButtonGroup>
                     &nbsp;
                     <ButtonGroup>
