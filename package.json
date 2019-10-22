@@ -4,6 +4,7 @@
   "main": "index.js",
   "author": "Alex Collins <alex_collins@intuit.com>",
   "license": "MIT",
+  "homepage": "https://alexec.github.io/cnv/",
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
