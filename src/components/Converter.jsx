@@ -69,7 +69,7 @@ export class Converter extends Component {
           text = JSON.stringify(JWT.decode(text));
           break;
         case "text":
-          case 'sha1':
+        case "sha1":
           break;
         case "yaml":
           obj = YAML.parse(text);

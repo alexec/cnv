@@ -37,8 +37,8 @@
   },
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
-    "build": "webpack --mode production",
-    "deploy": "gh-pages -d dist",
+    "build": "yarn lint && webpack --mode production",
+    "deploy": "yarn clean && yarn build && gh-pages -d dist",
     "lint": "prettier \"**/*.{js,json,jsx,html}\" --write",
     "clean": "rm -Rf dist"
   }
