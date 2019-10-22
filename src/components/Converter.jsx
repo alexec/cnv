@@ -1,26 +1,26 @@
 import React, { Component } from "react";
-import {
-  Alert,
-  Container,
-  Button,
-  ButtonGroup,
-  Col,
-  FormGroup
-} from "react-bootstrap";
+import { Alert, Button, ButtonGroup, ButtonToolbar, Container, FormGroup } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import MonacoEditor from "react-monaco-editor";
 import YAML from "yaml";
+import JWT from "jsonwebtoken";
 
 export class Converter extends Component {
   constructor(props) {
     super(props);
     let item = this.readFromLocalStorage();
 
-    this.state = item || {
-      a: { value: "", types: this.detectTypes("") },
-      b: { value: "", types: this.detectTypes("") }
-    };
-    this.state.ab = this.state.ab || "a";
+    this.state = item || {};
+    if (!Array.isArray(this.state.stack)) {
+      this.state.stack = [];
+    }
+    try {
+      if (this.state.stack.length === 0) {
+        this.state.stack.push({ value: "{}", type: "json" });
+      }
+    } catch (e) {
+      this.state.error = e;
+    }
   }
 
   readFromLocalStorage() {
@@ -33,146 +33,145 @@ export class Converter extends Component {
     return item;
   }
 
-  detectTypes(val) {
-    const types = ["text"];
+  convert(to) {
+    let text = this.state.stack[0].value;
+    let from = this.state.stack[0].type;
+    let obj = null;
+
+    console.log("from " + from + ", to " + to);
+
     try {
-      JSON.parse(val);
-      types.push("json");
-    } catch (ignored) {}
-    try {
-      YAML.parse(val);
-      types.push("yaml");
-    } catch (ignored) {}
-    try {
-      atob(val);
-      types.push("base64");
-    } catch (ignored) {}
-    return types;
-  }
+      switch (from) {
+        case "base64":
+          text = atob(text);
+          break;
+        case "json":
+          obj = JSON.parse(text);
+          break;
+        case "jwt":
+          text = JSON.stringify(JWT.decode(text));
+          break;
+        case "text":
+          break;
+        case "yaml":
+          obj = YAML.parse(text);
+          break;
+        default:
+          throw new Error("cannot convert from " + from);
+      }
 
-  convert(text, from, to) {
-    const reps = {
-      base64: "text",
-      text: "text",
-      json: "obj",
-      yaml: "obj"
-    };
+      console.log("text=" + text);
+      console.log(obj);
 
-    let obj;
-    switch (from) {
-      case "base64":
-        text = btoa(text);
-        break;
-      case "json":
-        obj = JSON.parse(text);
-        break;
-      case "text":
-        break;
-      case "yaml":
-        obj = YAML.parse(text);
-        break;
-      default:
-        throw new Error();
-    }
+      switch (to) {
+        case "base64":
+          text = btoa(text);
+          break;
+        case "json":
+          text = JSON.stringify(obj, null, 2);
+          break;
+        case "text":
+          break;
+        case "yaml":
+          text = YAML.stringify(obj);
+          break;
+        default:
+          throw new Error("cannot convert to " + to);
+      }
 
-    console.log(text);
+      console.log("text=" + text);
 
-    switch (to) {
-      case "base64":
-        return atob(text);
-      case "json":
-        return JSON.stringify(obj, null, 2);
-      case "text":
-        return text;
-      case "yaml":
-        return YAML.stringify(obj);
-      default:
-        throw new Error();
+      this.store(s => {
+        s.stack.unshift({ value: text, type: to });
+        s.stack = s.stack.slice(0, 10);
+        s.error = null;
+      });
+    } catch (e) {
+      this.store(s => {
+        s.error = e;
+      });
     }
   }
 
   store(fn) {
     this.setState(s => {
       fn(s);
-      const ab = s.ab;
-      s[ab].types = this.detectTypes(s[ab].value);
-      if (s[ab].type === undefined) {
-        if (s[ab].types.length === 1) {
-          s[ab].type = s[ab].types[0];
-        }
-      }
-      const ba = ab === "a" ? "b" : "a";
-
-      if (s[ab].type !== undefined && s[ba].type !== undefined) {
-        try {
-          s[ba].value = this.convert(s[ab].value, s[ab].type, s[ba].type);
-          s.error = null;
-        } catch (e) {
-          s.error = e;
-        }
-      }
       localStorage.setItem("state", JSON.stringify(s));
       return s;
     });
   }
 
-  type(ab, type) {
+  type(type) {
     this.store(s => {
-      s[ab].type = type;
+      s.stack[0].type = type;
     });
   }
 
-  change(ab, val) {
+  change(val) {
     this.store(s => {
-      s.ab = ab;
-      s[ab].value = val;
+      s.stack[0].value = val;
+    });
+  }
+
+  clearHistory() {
+    this.store((s) => {
+      s.stack = [{ value: "{}", type: "json" }];
+      s.error = null;
     });
   }
 
   render() {
     return (
       <Container>
-        <Form>
-          <Form.Row>
-            <Col>
-              {this.state.error && (
-                <Alert key="error" variant="warning">
-                  {this.state.error.message}
-                </Alert>
-              )}
-            </Col>
-          </Form.Row>
-          <Form.Row>
-            {["a", "b"].map(ab => (
-              <Col key={`col-${ab}`}>
-                <FormGroup controlId="a">
-                  <ButtonGroup>
-                    {["text", "json", "yaml", "base64"].map(type => (
-                      <Button
-                        key={`button-${ab}-${type}`}
-                        variant={`${
-                          this.state[ab].type === type ? "primary" : "secondary"
-                        }`}
-                        onClick={() => {
-                          this.type(ab, type);
-                        }}
-                      >
-                        {type}
-                      </Button>
-                    ))}
-                  </ButtonGroup>
-                  <MonacoEditor
-                    language={this.state[ab].type}
-                    key={`editor-${ab}`}
-                    value={this.state[ab].value}
-                    onChange={val => this.change(ab, val)}
-                    height="800"
-                  />
-                </FormGroup>
-              </Col>
-            ))}
-          </Form.Row>
-        </Form>
+        {this.state.error && (
+          <Alert key="error" variant="warning">
+            {this.state.error.message}
+          </Alert>
+        )}
+        {this.state.stack.map((entry, i) => (
+          <Form key={`form-${i}`}>
+            <FormGroup controlId="a">
+              <h4>#{this.state.stack.length - i}</h4>
+              {i === 0 && <ButtonToolbar>
+                <ButtonGroup>
+                  {["text", "json", "yaml", "base64", "jwt"].map(type => (
+                    <Button
+                      key={`button-type-${i}-${type}`}
+                      variant={`outline-${this.state.stack[i].type === type ? "primary" : "secondary"}`}
+                      onClick={() => {
+                        this.type(type);
+                      }}>{type}</Button>
+                  ))}
+                </ButtonGroup>
+                <i className='fa fa-right-arrow'/>
+                <ButtonGroup>
+                  {["text", "json", "yaml", "base64", "jwt"].map(type => (
+                    <Button
+                      key={`button-convert-${i}-${type}`}
+                      variant="secondary"
+                      onClick={() => {
+                        this.convert(type);
+                      }}>{type}</Button>
+                  ))}
+                </ButtonGroup>
+                <ButtonGroup>
+                  <Button key='clear-history' variant='danger' onClick={() => {
+                    this.clearHistory();
+                  }}>Clear History</Button>
+                </ButtonGroup>
+              </ButtonToolbar>
+              }
+              <MonacoEditor
+                language={this.state.stack[i].type}
+                key={`editor-${i}`}
+                value={this.state.stack[i].value}
+                onChange={val => this.change(val)}
+                height="400px"
+              />
+            </FormGroup>
+
+          </Form>
+        ))}
       </Container>
     );
   }
