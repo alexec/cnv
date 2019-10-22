@@ -11,6 +11,7 @@ import {
 import YAML from "yaml";
 import JWT from "jsonwebtoken";
 import sha1 from "sha1";
+import parser from "fast-xml-parser";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Form from "react-bootstrap/Form";
@@ -90,6 +91,9 @@ export class Converter extends Component {
           break;
         case "text":
         case "sha1":
+          break;
+        case "xml":
+          obj = parser.parse(text, {});
           break;
         case "url":
           text = decodeURI(text);
@@ -239,6 +243,7 @@ export class Converter extends Component {
                         "text",
                         "json",
                         "yaml",
+                        "xml",
                         "hex",
                         "base64",
                         "jwt",
