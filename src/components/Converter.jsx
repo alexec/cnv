@@ -71,6 +71,9 @@ export class Converter extends Component {
         case "text":
         case "sha1":
           break;
+        case "url":
+          text = decodeURI(text);
+          break;
         case "yaml":
           obj = YAML.parse(text);
           break;
@@ -92,6 +95,9 @@ export class Converter extends Component {
           text = sha1(text);
           break;
         case "text":
+          break;
+        case "url":
+          text = encodeURI(text);
           break;
         case "yaml":
           if (obj === null) {
@@ -206,35 +212,39 @@ export class Converter extends Component {
                   <ButtonToolbar className="justify-content-between">
                     <ButtonGroup>
                       <Button disabled>From:</Button>
-                      {["text", "json", "yaml", "base64", "jwt"].map(type => (
-                        <Button
-                          key={`button-type-${i}-${type}`}
-                          variant={`${
-                            this.state.stack[i].type === type
-                              ? "primary"
-                              : "secondary"
-                          }`}
-                          onClick={() => {
-                            this.type(type);
-                          }}
-                        >
-                          {type}
-                        </Button>
-                      ))}
+                      {["text", "json", "yaml", "base64", "jwt", "url"].map(
+                        type => (
+                          <Button
+                            key={`button-type-${i}-${type}`}
+                            variant={`${
+                              this.state.stack[i].type === type
+                                ? "primary"
+                                : "secondary"
+                            }`}
+                            onClick={() => {
+                              this.type(type);
+                            }}
+                          >
+                            {type}
+                          </Button>
+                        )
+                      )}
                     </ButtonGroup>
                     <ButtonGroup>
                       <Button disabled>To:</Button>
-                      {["json", "yaml", "base64", "sha1"].map(type => (
-                        <Button
-                          key={`button-convert-${i}-${type}`}
-                          variant="secondary"
-                          onClick={() => {
-                            this.convert(type);
-                          }}
-                        >
-                          {type}
-                        </Button>
-                      ))}
+                      {["text", "json", "yaml", "base64", "sha1", "url"].map(
+                        type => (
+                          <Button
+                            key={`button-convert-${i}-${type}`}
+                            variant="secondary"
+                            onClick={() => {
+                              this.convert(type);
+                            }}
+                          >
+                            {type}
+                          </Button>
+                        )
+                      )}
                     </ButtonGroup>
                     &nbsp;
                     <ButtonGroup>
