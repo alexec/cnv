@@ -14,10 +14,16 @@ import sha1 from "sha1";
 import parser from "fast-xml-parser";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import Form from "react-bootstrap/Form";
 import Nav from "react-bootstrap/Nav";
 import NavbarCollapse from "react-bootstrap/NavbarCollapse";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
+import AceEditor from "react-ace";
+
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/mode-xml";
+import "ace-builds/src-noconflict/mode-yaml";
+import "ace-builds/src-noconflict/theme-github";
+import Badge from "react-bootstrap/Badge";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
@@ -201,7 +207,7 @@ export class Converter extends Component {
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="http://bit.ly/cnvcode">
             <i style={{ color: "red" }} className="fa fa-code" />{" "}
-            http://bit.ly/cnvcode
+            http://bit.ly/cnvcode <Badge variant="secondary">Beta</Badge>
           </Navbar.Brand>
           <Navbar.Toggle />
           <NavbarCollapse className="justify-content-end">
@@ -311,11 +317,14 @@ export class Converter extends Component {
             )}
             <Row>
               <Col>
-                <Form.Control
-                  as="textarea"
-                  rows={10}
-                  key={`editor-${i}`}
+                <AceEditor
+                  mode={this.state.stack[i].type}
+                  theme={"github"}
+                  tabSize={2}
+                  name={`editor-${i}`}
                   value={this.state.stack[i].value}
+                  readOnly={i > 0}
+                  width={"auto"}
                   onChange={e => this.change(e.target.value)}
                 />
               </Col>
