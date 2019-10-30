@@ -325,7 +325,8 @@ export class Converter extends Component {
                   value={this.state.stack[i].value}
                   readOnly={i > 0}
                   width={"auto"}
-                  onChange={e => this.change(e.target.value)}
+                  editorProps={{ $blockScrolling: true }}
+                  onChange={value => this.change(value)}
                 />
               </Col>
             </Row>
