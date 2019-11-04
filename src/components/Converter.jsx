@@ -11,7 +11,6 @@ import {
 import YAML from "yaml";
 import JWT from "jsonwebtoken";
 import sha1 from "sha1";
-import parser from "fast-xml-parser";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Nav from "react-bootstrap/Nav";
@@ -27,7 +26,6 @@ import Badge from "react-bootstrap/Badge";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-bootstrap/Modal";
-import Toast from "react-bootstrap/Toast";
 import { convert } from "./convert";
 
 const example = {
@@ -98,7 +96,7 @@ export class Converter extends Component {
     const from = this.state.stack[0].type;
 
     try {
-      const { newText } = convert(text, from, to);
+      const newText = convert(text, from, to);
 
       this.store(s => {
         s.stack.unshift({ value: newText, type: to });
@@ -191,6 +189,7 @@ export class Converter extends Component {
       s.modalIsOpen = false;
     });
   }
+
   render() {
     return (
       <React.Fragment>

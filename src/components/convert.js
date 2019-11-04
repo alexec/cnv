@@ -66,5 +66,5 @@ export const convert = (text, from, to) => {
       throw new Error("cannot convert to " + to);
   }
 
-  return { text, obj };
+  return text;
 };
