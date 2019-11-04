@@ -24,7 +24,8 @@ import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/theme-github";
 import Badge from "react-bootstrap/Badge";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
   type: "json"
@@ -42,10 +43,10 @@ export class Converter extends Component {
     }
     try {
       if (this.state.stack.length === 0) {
-        this.state.stack.push({ value: example, type: "json" });
+        this.state.stack.push(example);
       }
     } catch (e) {
-      this.state.error = e;
+      console.log(e);
     }
   }
 
@@ -150,8 +151,13 @@ export class Converter extends Component {
         s.error = null;
       });
     } catch (e) {
+      console.log(e);
+      const annotation = this.annotation(e.message, text);
       this.store(s => {
-        s.error = e;
+        s.stack[0].error = new Error(
+          "line " + (annotation.row + 1) + ": " + e.message
+        );
+        s.stack[0].annotations = [annotation];
       });
     }
   }
@@ -173,7 +179,6 @@ export class Converter extends Component {
   change(val) {
     this.store(s => {
       s.stack[0].value = val;
-      s.copied = false;
     });
   }
 
@@ -181,7 +186,6 @@ export class Converter extends Component {
     this.store(s => {
       s.stack = [example];
       s.error = null;
-      s.copied = false;
     });
   }
 
@@ -190,15 +194,20 @@ export class Converter extends Component {
       if (s.stack.length >= 2) {
         s.stack.shift();
         s.error = null;
-        s.copied = false;
       }
     });
   }
 
-  setCopied() {
-    this.store(s => {
-      s.copied = true;
-    });
+  position(message) {
+    return parseInt(message.match(/position [0-9]*/)[0].substring(9));
+  }
+
+  annotation(message, value) {
+    const p = this.position(message);
+    const text = value.substring(0, p);
+    const row = text.split("\n").length - 1;
+    const col = text.substring(text.lastIndexOf("\n")).length;
+    return { row: row, column: col, text: message, type: "error" };
   }
 
   render() {
@@ -229,19 +238,17 @@ export class Converter extends Component {
             </Nav.Item>
           </NavbarCollapse>
         </Navbar>
-        <Container fluid={true}>
-          {this.state.error && (
-            <Alert key="error" variant="warning">
-              {this.state.error.message}
-            </Alert>
-          )}
-        </Container>
         {this.state.stack.map((entry, i) => (
           <Container key={`container-${i}`} fluid={true}>
             <h4>#{this.state.stack.length - i}</h4>
             {i === 0 && (
               <Row>
                 <Col>
+                  {this.state.stack[i].error && (
+                    <Alert key="error" variant="danger">
+                      {this.state.stack[i].error.message}
+                    </Alert>
+                  )}
                   <ButtonToolbar className="justify-content-between">
                     <ButtonGroup>
                       <Button disabled>From:</Button>
@@ -300,13 +307,10 @@ export class Converter extends Component {
                       <CopyToClipboard
                         text={this.state.stack[i].value}
                         onCopy={() => {
-                          this.setCopied();
+                          toast("Copied to clipboard");
                         }}
                       >
-                        <Button
-                          variant="secondary"
-                          disabled={this.state.copied}
-                        >
+                        <Button variant="secondary">
                           <i className="fa fa-clipboard" />
                         </Button>
                       </CopyToClipboard>
@@ -325,13 +329,14 @@ export class Converter extends Component {
                   value={this.state.stack[i].value}
                   readOnly={i > 0}
                   width={"auto"}
-                  editorProps={{ $blockScrolling: true }}
                   onChange={value => this.change(value)}
+                  annotations={this.state.stack[i].annotations || []}
                 />
               </Col>
             </Row>
           </Container>
         ))}
+        <ToastContainer />
       </React.Fragment>
     );
   }
