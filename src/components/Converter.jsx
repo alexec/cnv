@@ -26,6 +26,8 @@ import "ace-builds/src-noconflict/theme-github";
 import Badge from "react-bootstrap/Badge";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Modal from "react-bootstrap/Modal";
+import Toast from "react-bootstrap/Toast";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
@@ -47,10 +49,9 @@ const types = {
 export class Converter extends Component {
   constructor(props) {
     super(props);
-    let item = this.readFromLocalStorage();
+    const item = this.readFromLocalStorage();
 
     this.state = item || {};
-    this.state.copied = false;
     if (!Array.isArray(this.state.stack)) {
       this.state.stack = [];
     }
@@ -164,7 +165,6 @@ export class Converter extends Component {
         s.stack = s.stack.slice(0, 10);
       });
     } catch (e) {
-      console.log(e);
       const annotation = this.annotation(e, text);
       this.store(s => {
         if (annotation) {
@@ -240,6 +240,17 @@ export class Converter extends Component {
     return null;
   }
 
+  openModal() {
+    this.store(s => {
+      s.modalIsOpen = true;
+    });
+  }
+
+  closeModal() {
+    this.store(s => {
+      s.modalIsOpen = false;
+    });
+  }
   render() {
     return (
       <React.Fragment>
@@ -251,8 +262,13 @@ export class Converter extends Component {
           <Navbar.Toggle />
           <NavbarCollapse className="justify-content-end">
             <Nav.Item>
+              <Nav.Link href="#" onClick={() => this.openModal()} title="Help">
+                <i className="fa fa-question-circle" /> Help
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
               <Nav.Link href="https://github.com/alexec/cnv" title="Github">
-                <i className="fa fa-github" />
+                <i className="fa fa-github" /> Github
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
@@ -263,11 +279,57 @@ export class Converter extends Component {
                 }}
                 title="Clear history"
               >
-                <i className="fa fa-trash" />
+                <i className="fa fa-trash" /> Clear history
               </Button>
             </Nav.Item>
           </NavbarCollapse>
         </Navbar>
+
+        <Modal show={this.state.modalIsOpen} onHide={() => this.closeModal()}>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {" "}
+              <i style={{ color: "red" }} className="fa fa-code" /> Code
+              Converter
+            </Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            <blockquote>
+              <p>
+                I am a <b>software engineer</b>,
+              </p>
+              <p>
+                I am trying to{" "}
+                <b>
+                  convert code between different encodings, such as JSON and
+                  YAML, reliably and quickly.
+                </b>
+                ,{" "}
+              </p>
+              <p>
+                but{" "}
+                <b>
+                  I have to use many different websites and tools, some of which
+                  send my data to a third-party server
+                </b>
+                ,
+              </p>
+              <p>
+                because <b>nothing currently exists</b>,
+              </p>
+              <p>
+                which makes me feel <b>frustrated and worried</b>.
+              </p>
+            </blockquote>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => this.closeModal()}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
         {this.state.stack.map((entry, i) => (
           <Container key={`container-${i}`} fluid={true}>
             <h4>#{this.state.stack.length - i}</h4>
