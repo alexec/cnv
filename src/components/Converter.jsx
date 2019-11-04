@@ -24,8 +24,9 @@ import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/theme-github";
 import Badge from "react-bootstrap/Badge";
-import { ToastContainer, toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
   type: "json"
@@ -148,16 +149,19 @@ export class Converter extends Component {
       this.store(s => {
         s.stack.unshift({ value: text, type: to });
         s.stack = s.stack.slice(0, 10);
-        s.error = null;
       });
     } catch (e) {
       console.log(e);
-      const annotation = this.annotation(e.message, text);
+      const annotation = this.annotation(e, text);
       this.store(s => {
-        s.stack[0].error = new Error(
-          "line " + (annotation.row + 1) + ": " + e.message
-        );
-        s.stack[0].annotations = [annotation];
+        if (annotation) {
+          s.stack[0].error = {
+            message: "line " + (annotation.row + 1) + ": " + e.message
+          };
+          s.stack[0].annotations = [annotation];
+        } else {
+          s.stack[0].error = { message: e.message };
+        }
       });
     }
   }
@@ -185,7 +189,6 @@ export class Converter extends Component {
   clearHistory() {
     this.store(s => {
       s.stack = [example];
-      s.error = null;
     });
   }
 
@@ -193,21 +196,35 @@ export class Converter extends Component {
     this.store(s => {
       if (s.stack.length >= 2) {
         s.stack.shift();
-        s.error = null;
       }
     });
   }
 
-  position(message) {
-    return parseInt(message.match(/position [0-9]*/)[0].substring(9));
+  position(e) {
+    const match = e.message.match(/at position [0-9]*/);
+    if (match) {
+      return parseInt(match[0].substring(9));
+    }
+    if (e.source && e.source.range) {
+      return e.source.range.start;
+    }
+    return null;
   }
 
-  annotation(message, value) {
-    const p = this.position(message);
-    const text = value.substring(0, p);
-    const row = text.split("\n").length - 1;
-    const col = text.substring(text.lastIndexOf("\n")).length;
-    return { row: row, column: col, text: message, type: "error" };
+  annotation(e, value) {
+    const p = this.position(e);
+    if (p != null) {
+      const text = value.substring(0, p);
+      const row = text.split("\n").length - 1;
+      const col = text.substring(text.lastIndexOf("\n")).length;
+      return {
+        row: row,
+        column: col,
+        text: e.message.replace(/at position [0-9]*/, ""),
+        type: "error"
+      };
+    }
+    return null;
   }
 
   render() {

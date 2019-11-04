@@ -7,6 +7,3 @@ An online code converter:
 * Re-formatting.
 * Error highlighting. 
 
-## TODO
-
-* [ ] CSP
