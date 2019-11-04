@@ -21,14 +21,14 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/mode-yaml";
-import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/theme-textmate";
 import Badge from "react-bootstrap/Badge";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { convert } from "./convert";
 import { HelpModal } from "./HelpModal";
 
-import "./styles.css"
+import "./styles.css";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
@@ -43,6 +43,7 @@ const types = {
   hex: { name: "Hex" },
   base64: { name: "Base 64" },
   sha1: { name: "SHA1" },
+  sha256: { name: "SHA256" },
   url: { name: "URL" },
   xml: { name: "XML" }
 };
@@ -178,31 +179,50 @@ export class Converter extends Component {
     return (
       <React.Fragment>
         <Navbar bg="light" expand="lg">
-          <Navbar.Brand href="http://bit.ly/cnvcode">
-            <i className="fa fa-code logo" />{" "}
-            Code Chameleon <Badge variant="secondary">Beta</Badge>
+          <Navbar.Brand href="http://bit.ly/cnvcode" class={"logo"}>
+            <img src="assets/favicon.png" /> Code Chameleon
+            <Badge variant="secondary">Beta</Badge>
           </Navbar.Brand>
           <Navbar.Toggle />
           <NavbarCollapse className="justify-content-end">
             <Nav.Item>
-              <Nav.Link href="#" onClick={() => this.openModal()} title="Help">
+              <Button
+                onClick={() => this.openModal()}
+                title="Help"
+                variant="secondary"
+              >
                 <i className="fa fa-question-circle" /> Help
-              </Nav.Link>
+              </Button>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link href="https://github.com/alexec/cnv" title="Github" variant='secondary'>
+              <Button
+                onClick={() =>
+                  (document.location.href = "https://github.com/alexec/cnv")
+                }
+                title="Github"
+                variant="secondary"
+              >
                 <i className="fa fa-github" /> Github
-              </Nav.Link>
+              </Button>
             </Nav.Item>
             <Nav.Item>
-              <Button variant="secondary" onClick={() => {this.clearHistory();}} title="Clear history">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  this.clearHistory();
+                }}
+                title="Clear history"
+              >
                 <i className="fa fa-trash" /> Clear history
               </Button>
             </Nav.Item>
           </NavbarCollapse>
         </Navbar>
 
-        <HelpModal show={this.state.modalIsOpen} onHide={() => this.closeModal()}/>
+        <HelpModal
+          show={this.state.modalIsOpen}
+          onHide={() => this.closeModal()}
+        />
         {this.state.stack.map((entry, i) => (
           <Container key={`container-${i}`} fluid={true}>
             <h4>#{this.state.stack.length - i}</h4>
@@ -251,6 +271,7 @@ export class Converter extends Component {
                         "hex",
                         "base64",
                         "sha1",
+                        "sha256",
                         "url"
                       ].map(type => (
                         <Button
@@ -293,7 +314,7 @@ export class Converter extends Component {
               <Col>
                 <AceEditor
                   mode={this.state.stack[i].type}
-                  theme={"github"}
+                  theme="textmate"
                   tabSize={2}
                   name={`editor-${i}`}
                   value={this.state.stack[i].value}
@@ -307,6 +328,16 @@ export class Converter extends Component {
           </Container>
         ))}
         <ToastContainer />
+        <p>
+          Icons made by{" "}
+          <a href="https://www.flaticon.com/authors/freepik" title="Freepik">
+            Freepik
+          </a>{" "}
+          from{" "}
+          <a href="https://www.flaticon.com/" title="Flaticon">
+            www.flaticon.com
+          </a>
+        </p>
       </React.Fragment>
     );
   }

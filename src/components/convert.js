@@ -3,6 +3,8 @@ import parser from "fast-xml-parser";
 import YAML from "yaml";
 import sha1 from "sha1";
 
+const sha256 = require("js-sha256").sha256;
+
 export const convert = (text, from, to) => {
   let obj = null;
 
@@ -21,6 +23,7 @@ export const convert = (text, from, to) => {
       break;
     case "text":
     case "sha1":
+    case "sha256":
       break;
     case "xml":
       obj = parser.parse(text, {});
@@ -37,34 +40,28 @@ export const convert = (text, from, to) => {
 
   switch (to) {
     case "base64":
-      text = btoa(text);
-      break;
+      return btoa(text);
     case "hex":
-      text = this.hexEncode(text);
-      break;
+      return this.hexEncode(text);
     case "json":
       if (obj === null) {
         obj = JSON.parse(text);
       }
-      text = JSON.stringify(obj, null, 2);
-      break;
+      return JSON.stringify(obj, null, 2);
     case "sha1":
-      text = sha1(text);
-      break;
+      return sha1(text);
+    case "sha256":
+      return sha256(text);
     case "text":
-      break;
+      return text;
     case "url":
-      text = encodeURI(text);
-      break;
+      return encodeURI(text);
     case "yaml":
       if (obj === null) {
         obj = YAML.parse(text);
       }
-      text = YAML.stringify(obj);
-      break;
+      return YAML.stringify(obj);
     default:
       throw new Error("cannot convert to " + to);
   }
-
-  return text;
 };
