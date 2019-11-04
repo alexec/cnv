@@ -29,6 +29,7 @@ import { convert } from "./convert";
 import { HelpModal } from "./HelpModal";
 
 import "./styles.css";
+import { Logo } from "./logo";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
@@ -180,8 +181,7 @@ export class Converter extends Component {
       <React.Fragment>
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="http://bit.ly/cnvcode">
-            <img src="assets/favicon.png" /> Code Chameleon{" "}
-            <Badge variant="secondary">Beta</Badge>
+            <Logo /> Code Chameleon <Badge variant="secondary">Beta</Badge>
           </Navbar.Brand>
           <Navbar.Toggle />
           <NavbarCollapse className="justify-content-end">
