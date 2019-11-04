@@ -28,6 +28,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-bootstrap/Modal";
 import Toast from "react-bootstrap/Toast";
+import { convert } from "./convert";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
@@ -93,75 +94,14 @@ export class Converter extends Component {
   }
 
   convert(to) {
-    let text = this.state.stack[0].value;
-    let from = this.state.stack[0].type;
-    let obj = null;
+    const text = this.state.stack[0].value;
+    const from = this.state.stack[0].type;
 
     try {
-      switch (from) {
-        case "base64":
-          text = atob(text);
-          break;
-        case "hex":
-          text = this.hexDecode(text);
-          break;
-        case "json":
-          obj = JSON.parse(text);
-          break;
-        case "jwt":
-          text = JSON.stringify(JWT.decode(text));
-          break;
-        case "text":
-        case "sha1":
-          break;
-        case "xml":
-          obj = parser.parse(text, {});
-          break;
-        case "url":
-          text = decodeURI(text);
-          break;
-        case "yaml":
-          obj = YAML.parse(text);
-          break;
-        default:
-          throw new Error("cannot convert from " + from);
-      }
-
-      switch (to) {
-        case "base64":
-          text = btoa(text);
-          break;
-        case "hex":
-          text = this.hexEncode(text);
-          break;
-        case "json":
-          if (obj === null) {
-            obj = JSON.parse(text);
-          }
-          text = JSON.stringify(obj, null, 2);
-          break;
-        case "sha1":
-          text = sha1(text);
-          break;
-        case "text":
-          break;
-        case "url":
-          text = encodeURI(text);
-          break;
-        case "yaml":
-          if (obj === null) {
-            obj = YAML.parse(text);
-          }
-          text = YAML.stringify(obj);
-          break;
-        default:
-          throw new Error("cannot convert to " + to);
-      }
-
-      console.log("from=" + from + ", to=" + to + ", text=" + typeof text);
+      const { newText } = convert(text, from, to);
 
       this.store(s => {
-        s.stack.unshift({ value: text, type: to });
+        s.stack.unshift({ value: newText, type: to });
         s.stack = s.stack.slice(0, 10);
       });
     } catch (e) {
@@ -404,12 +344,12 @@ export class Converter extends Component {
                         }}
                       >
                         <Button variant="secondary" title="Copy to clipboard">
-                          <i className="fa fa-clipboard" />
+                          <i className="fa fa-clipboard" /> Copy
                         </Button>
                       </CopyToClipboard>
 
                       <Button onClick={() => this.undo()} title="Discard">
-                        <i className="fa fa-times" />
+                        <i className="fa fa-times" /> Discard
                       </Button>
                     </ButtonGroup>
                   </ButtonToolbar>
