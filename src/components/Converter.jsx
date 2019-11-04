@@ -32,6 +32,18 @@ const example = {
   type: "json"
 };
 
+const types = {
+  text: { name: "Text" },
+  json: { name: "JSON" },
+  jwt: { name: "JWT" },
+  yaml: { name: "YAML" },
+  hex: { name: "Hex" },
+  base64: { name: "Base 64" },
+  sha1: { name: "SHA1" },
+  url: { name: "URL" },
+  xml: { name: "XML" }
+};
+
 export class Converter extends Component {
   constructor(props) {
     super(props);
@@ -290,7 +302,7 @@ export class Converter extends Component {
                             this.type(type);
                           }}
                         >
-                          {type}
+                          {types[type].name}
                         </Button>
                       ))}
                     </ButtonGroup>
@@ -312,25 +324,26 @@ export class Converter extends Component {
                             this.convert(type);
                           }}
                         >
-                          {type}
+                          {types[type].name}
                         </Button>
                       ))}
                     </ButtonGroup>
                     &nbsp;
                     <ButtonGroup>
-                      <Button onClick={() => this.undo()}>
-                        <i className="fa fa-undo" />
-                      </Button>
                       <CopyToClipboard
                         text={this.state.stack[i].value}
                         onCopy={() => {
                           toast("Copied to clipboard");
                         }}
                       >
-                        <Button variant="secondary">
+                        <Button variant="secondary" title="Copy to clipboard">
                           <i className="fa fa-clipboard" />
                         </Button>
                       </CopyToClipboard>
+
+                      <Button onClick={() => this.undo()} title="Discard">
+                        <i className="fa fa-times" />
+                      </Button>
                     </ButtonGroup>
                   </ButtonToolbar>
                 </Col>
