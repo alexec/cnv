@@ -84,7 +84,7 @@ export class Converter extends Component {
 
   hexEncode(str) {
     const arr1 = [];
-    for (var n = 0, l = str.length; n < l; n++) {
+    for (let n = 0, l = str.length; n < l; n++) {
       const hex = Number(str.charCodeAt(n)).toString(16);
       arr1.push(hex);
     }
