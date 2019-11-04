@@ -73,21 +73,22 @@ export class Converter extends Component {
     return item;
   }
 
-  hexDecode(text) {
-    const hexes = text.match(/.{1,4}/g) || [];
-    let back = "";
-    for (let j = 0; j < hexes.length; j++) {
-      back += String.fromCharCode(parseInt(hexes[j], 16));
+  hexDecode(str1) {
+    const hex = str1.toString();
+    let str = "";
+    for (let n = 0; n < hex.length; n += 2) {
+      str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
     }
-    return back;
+    return str;
   }
 
-  hexEncode(text) {
-    let result = "";
-    for (let i = 0; i < text.length; i++) {
-      result += ("000" + text.charCodeAt(i).toString(16)).slice(-4);
+  hexEncode(str) {
+    const arr1 = [];
+    for (var n = 0, l = str.length; n < l; n++) {
+      const hex = Number(str.charCodeAt(n)).toString(16);
+      arr1.push(hex);
     }
-    return result;
+    return arr1.join("");
   }
 
   convert(to) {
@@ -319,7 +320,11 @@ export class Converter extends Component {
                       ].map(type => (
                         <Button
                           key={`button-convert-${i}-${type}`}
-                          variant="secondary"
+                          variant={`${
+                            this.state.stack[i].type === type
+                              ? "primary"
+                              : "secondary"
+                          }`}
                           onClick={() => {
                             this.convert(type);
                           }}
