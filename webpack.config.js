@@ -39,9 +39,14 @@ module.exports = {
       filename: "./index.html"
     }),
     new CspHtmlWebpackPlugin({
-      'object-src': ["https://fonts.googleapis.com"],
-      'script-src': ["'unsafe-inline'", "'self'", "'unsafe-eval'"],
-      'style-src': ["'unsafe-inline'", "'self'", "'unsafe-eval'", "https://stackpath.bootstrapcdn.com"]
+      "object-src": ["https://fonts.googleapis.com"],
+      "script-src": ["'unsafe-inline'", "'self'", "'unsafe-eval'"],
+      "style-src": [
+        "'unsafe-inline'",
+        "'self'",
+        "'unsafe-eval'",
+        "https://stackpath.bootstrapcdn.com"
+      ]
     })
   ]
 };
