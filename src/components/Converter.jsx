@@ -25,8 +25,10 @@ import "ace-builds/src-noconflict/theme-github";
 import Badge from "react-bootstrap/Badge";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Modal from "react-bootstrap/Modal";
 import { convert } from "./convert";
+import { HelpModal } from "./HelpModal";
+
+import "./styles.css"
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
@@ -177,8 +179,8 @@ export class Converter extends Component {
       <React.Fragment>
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="http://bit.ly/cnvcode">
-            <i style={{ color: "red" }} className="fa fa-code" />{" "}
-            http://bit.ly/cnvcode <Badge variant="secondary">Beta</Badge>
+            <i className="fa fa-code logo" />{" "}
+            Code Chameleon <Badge variant="secondary">Beta</Badge>
           </Navbar.Brand>
           <Navbar.Toggle />
           <NavbarCollapse className="justify-content-end">
@@ -188,69 +190,19 @@ export class Converter extends Component {
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Nav.Link href="https://github.com/alexec/cnv" title="Github">
+              <Nav.Link href="https://github.com/alexec/cnv" title="Github" variant='secondary'>
                 <i className="fa fa-github" /> Github
               </Nav.Link>
             </Nav.Item>
             <Nav.Item>
-              <Button
-                variant="danger"
-                onClick={() => {
-                  this.clearHistory();
-                }}
-                title="Clear history"
-              >
+              <Button variant="secondary" onClick={() => {this.clearHistory();}} title="Clear history">
                 <i className="fa fa-trash" /> Clear history
               </Button>
             </Nav.Item>
           </NavbarCollapse>
         </Navbar>
 
-        <Modal show={this.state.modalIsOpen} onHide={() => this.closeModal()}>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {" "}
-              <i style={{ color: "red" }} className="fa fa-code" /> Code
-              Converter
-            </Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body>
-            <blockquote>
-              <p>
-                I am a <b>software engineer</b>,
-              </p>
-              <p>
-                I am trying to{" "}
-                <b>
-                  convert code between different encodings, such as JSON and
-                  YAML, reliably and quickly.
-                </b>
-                ,{" "}
-              </p>
-              <p>
-                but{" "}
-                <b>
-                  I have to use many different websites and tools, some of which
-                  send my data to a third-party server
-                </b>
-                ,
-              </p>
-              <p>
-                because <b>nothing currently exists</b>,
-              </p>
-              <p>
-                which makes me feel <b>frustrated and worried</b>.
-              </p>
-            </blockquote>
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => this.closeModal()}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <HelpModal show={this.state.modalIsOpen} onHide={() => this.closeModal()}/>
         {this.state.stack.map((entry, i) => (
           <Container key={`container-${i}`} fluid={true}>
             <h4>#{this.state.stack.length - i}</h4>
