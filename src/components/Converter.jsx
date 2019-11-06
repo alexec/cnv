@@ -156,9 +156,9 @@ export class Converter extends Component {
       <React.Fragment>
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="http://bit.ly/cnvcode">
-            <Logo/> Code Chameleon <Badge variant="secondary">Beta</Badge>
+            <Logo /> Code Chameleon <Badge variant="secondary">Beta</Badge>
           </Navbar.Brand>
-          <Navbar.Toggle/>
+          <Navbar.Toggle />
           <NavbarCollapse className="justify-content-end">
             <Nav.Item>
               <Button
@@ -166,7 +166,7 @@ export class Converter extends Component {
                 title="Help"
                 variant="light"
               >
-                <i className="fa fa-question-circle"/> Help
+                <i className="fa fa-question-circle" /> Help
               </Button>
             </Nav.Item>
             <Nav.Item>
@@ -177,7 +177,7 @@ export class Converter extends Component {
                 title="Github"
                 variant="light"
               >
-                <i className="fa fa-github"/> Github
+                <i className="fa fa-github" /> Github
               </Button>
             </Nav.Item>
             <Nav.Item>
@@ -188,7 +188,7 @@ export class Converter extends Component {
                 }}
                 title="Clear history"
               >
-                <i className="fa fa-trash"/> Clear history
+                <i className="fa fa-trash" /> Clear history
               </Button>
             </Nav.Item>
           </NavbarCollapse>
@@ -198,119 +198,121 @@ export class Converter extends Component {
           show={this.state.modalIsOpen}
           onHide={() => this.closeModal()}
         />
-        {this.state.error &&
-        <Alert key="error" variant="danger">
-          {this.state.error.message}
-        </Alert>
-        }
+        {this.state.error && (
+          <Alert key="error" variant="danger">
+            {this.state.error.message}
+          </Alert>
+        )}
         {this.state.stack.map((entry, i) => (
           <React.Fragment>
-            <Container fluid={true}><h4>#{this.state.stack.length - i}</h4></Container>
-            {i === 0 && <Container fluid={true} style={{paddingBottom: '5px'}}>
-              <ButtonToolbar className="justify-content-between">
-                <ButtonGroup>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("base64", "text")}
-                  >
-                    Base 64 <i className="fa fa-caret-right"/>
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("hex", "text")}
-                  >
-                    Hex <i className="fa fa-caret-right"/>
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("url", "text")}
-                  >
-                    URL <i className="fa fa-caret-right"/>
-                  </Button>
-                </ButtonGroup>
-                <ButtonGroup>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("jwt", "json")}
-                  >
-                    JWT <i className="fa fa-caret-right"/> JSON
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("yaml", "json")}
-                  >
-                    YAML <i className="fa fa-caret-right"/> JSON
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("xml", "json")}
-                  >
-                    XML <i className="fa fa-caret-right"/> JSON
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("json", "yaml")}
-                  >
-                    JSON <i className="fa fa-caret-right"/> YAML
-                  </Button>
-                </ButtonGroup>
-                <ButtonGroup>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("text", "base64")}
-                  >
-                    <i className="fa fa-caret-right"/> Base 64
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("text", "hex")}
-                  >
-                    <i className="fa fa-caret-right"/> Hex
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("text", "sha1")}
-                  >
-                    <i className="fa fa-caret-right"/> SHA-1
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("text", "sha256")}
-                  >
-                    <i className="fa fa-caret-right"/> SHA-256
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => this.convert("text", "url")}
-                  >
-                    <i className="fa fa-caret-right"/> URL
-                  </Button>
-                </ButtonGroup>
-                <ButtonGroup>
-                  <CopyToClipboard
-                    text={this.state.stack[i].value}
-                    onCopy={() => {
-                      toast("Copied to clipboard");
-                    }}
-                  >
-
-                    <Button variant="light" title="Copy to clipboard">
-                      <i className="fa fa-clipboard"/> Copy
-                    </Button>
-                  </CopyToClipboard>
-
-                  <Button
-                    variant="light"
-                    onClick={() => this.undo()}
-                    title="Discard"
-                  >
-                    <i className="fa fa-times"/> Discard
-                  </Button>
-                </ButtonGroup>
-              </ButtonToolbar>
+            <Container fluid={true}>
+              <h4>#{this.state.stack.length - i}</h4>
             </Container>
-            }
-            <Container fluid={true} style={{paddingBottom: '5px'}}>
+            {i === 0 && (
+              <Container fluid={true} style={{ paddingBottom: "5px" }}>
+                <ButtonToolbar className="justify-content-between">
+                  <ButtonGroup>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("base64", "text")}
+                    >
+                      Base 64 <i className="fa fa-caret-right" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("hex", "text")}
+                    >
+                      Hex <i className="fa fa-caret-right" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("url", "text")}
+                    >
+                      URL <i className="fa fa-caret-right" />
+                    </Button>
+                  </ButtonGroup>
+                  <ButtonGroup>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("jwt", "json")}
+                    >
+                      JWT <i className="fa fa-caret-right" /> JSON
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("yaml", "json")}
+                    >
+                      YAML <i className="fa fa-caret-right" /> JSON
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("xml", "json")}
+                    >
+                      XML <i className="fa fa-caret-right" /> JSON
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("json", "yaml")}
+                    >
+                      JSON <i className="fa fa-caret-right" /> YAML
+                    </Button>
+                  </ButtonGroup>
+                  <ButtonGroup>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "base64")}
+                    >
+                      <i className="fa fa-caret-right" /> Base 64
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "hex")}
+                    >
+                      <i className="fa fa-caret-right" /> Hex
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "sha1")}
+                    >
+                      <i className="fa fa-caret-right" /> SHA-1
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "sha256")}
+                    >
+                      <i className="fa fa-caret-right" /> SHA-256
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "url")}
+                    >
+                      <i className="fa fa-caret-right" /> URL
+                    </Button>
+                  </ButtonGroup>
+                  <ButtonGroup>
+                    <CopyToClipboard
+                      text={this.state.stack[i].value}
+                      onCopy={() => {
+                        toast("Copied to clipboard");
+                      }}
+                    >
+                      <Button variant="light" title="Copy to clipboard">
+                        <i className="fa fa-clipboard" /> Copy
+                      </Button>
+                    </CopyToClipboard>
+
+                    <Button
+                      variant="light"
+                      onClick={() => this.undo()}
+                      title="Discard"
+                    >
+                      <i className="fa fa-times" /> Discard
+                    </Button>
+                  </ButtonGroup>
+                </ButtonToolbar>
+              </Container>
+            )}
+            <Container fluid={true} style={{ paddingBottom: "5px" }}>
               <AceEditor
                 mode={this.state.stack[i].type}
                 theme="textmate"
@@ -325,7 +327,7 @@ export class Converter extends Component {
             </Container>
           </React.Fragment>
         ))}
-        <ToastContainer/>
+        <ToastContainer />
         <Container fluid={true}>
           Icons made by{" "}
           <a href="https://www.flaticon.com/authors/freepik" title="Freepik">
