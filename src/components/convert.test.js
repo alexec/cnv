@@ -7,7 +7,15 @@ test("base642text", () => {
 
 
 test("base2text-bad", () => {
-  expect(() => convert("zzz", "base64", "text")).toThrow("invalid base64");
+  expect(() => convert("???", "base64", "text")).toThrow("invalid base64");
+});
+
+test("hex2text", () => {
+  expect(convert("666f6f", "hex", "text")).toBe("foo");
+});
+
+test("hex2text-bad", () => {
+  expect(() => convert("zzz", "hex", "text")).toThrow("invalid hex");
 });
 
 test("jwt2json", () => {
@@ -53,14 +61,6 @@ test("text2base64", () => {
 
 test("text2hex", () => {
   expect(convert("foo", "text", "hex")).toBe("666f6f");
-});
-
-test("hex2text", () => {
-  expect(convert("666f6f", "hex", "text")).toBe("foo");
-});
-
-test("hex2text-bad", () => {
-  expect(() => convert("zzz", "hex", "text")).toThrow("invalid hex");
 });
 
 test("text2sha1", () => {
