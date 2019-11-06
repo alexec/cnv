@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Alert, Button, Col, Container, Navbar, Row } from "react-bootstrap";
+import { Alert, Button, Container, Navbar } from "react-bootstrap";
 import sha1 from "sha1";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -20,6 +20,7 @@ import { HelpModal } from "./HelpModal";
 
 import "./styles.css";
 import { Logo } from "./logo";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
@@ -35,12 +36,8 @@ export class Converter extends Component {
     if (!Array.isArray(this.state.stack)) {
       this.state.stack = [];
     }
-    try {
-      if (this.state.stack.length === 0) {
-        this.state.stack.push(example);
-      }
-    } catch (e) {
-      console.log(e);
+    if (this.state.stack.length === 0) {
+      this.state.stack.push(example);
     }
   }
 
@@ -55,26 +52,25 @@ export class Converter extends Component {
   }
 
   convert(from, to) {
-    from = from || this.state.stack[0].type;
     const text = this.state.stack[0].value;
-
     try {
       const newText = convert(text, from, to);
 
       this.store(s => {
         s.stack.unshift({ value: newText, type: to });
         s.stack = s.stack.slice(0, 10);
+        s.error = null;
       });
     } catch (e) {
       const annotation = this.annotation(e, text);
       this.store(s => {
         if (annotation) {
-          s.stack[0].error = {
+          s.error = {
             message: "line " + (annotation.row + 1) + ": " + e.message
           };
           s.stack[0].annotations = [annotation];
         } else {
-          s.stack[0].error = { message: e.message };
+          s.error = { message: e.message };
         }
       });
     }
@@ -103,6 +99,7 @@ export class Converter extends Component {
   clearHistory() {
     this.store(s => {
       s.stack = [example];
+      s.error = null;
     });
   }
 
@@ -110,6 +107,7 @@ export class Converter extends Component {
     this.store(s => {
       if (s.stack.length >= 2) {
         s.stack.shift();
+        s.error = null;
       }
     });
   }
@@ -158,17 +156,17 @@ export class Converter extends Component {
       <React.Fragment>
         <Navbar bg="light" expand="lg">
           <Navbar.Brand href="http://bit.ly/cnvcode">
-            <Logo /> Code Chameleon <Badge variant="secondary">Beta</Badge>
+            <Logo/> Code Chameleon <Badge variant="secondary">Beta</Badge>
           </Navbar.Brand>
-          <Navbar.Toggle />
+          <Navbar.Toggle/>
           <NavbarCollapse className="justify-content-end">
             <Nav.Item>
               <Button
                 onClick={() => this.openModal()}
                 title="Help"
-                variant="secondary"
+                variant="light"
               >
-                <i className="fa fa-question-circle" /> Help
+                <i className="fa fa-question-circle"/> Help
               </Button>
             </Nav.Item>
             <Nav.Item>
@@ -177,20 +175,20 @@ export class Converter extends Component {
                   (document.location.href = "https://github.com/alexec/cnv")
                 }
                 title="Github"
-                variant="secondary"
+                variant="light"
               >
-                <i className="fa fa-github" /> Github
+                <i className="fa fa-github"/> Github
               </Button>
             </Nav.Item>
             <Nav.Item>
               <Button
-                variant="secondary"
+                variant="light"
                 onClick={() => {
                   this.clearHistory();
                 }}
                 title="Clear history"
               >
-                <i className="fa fa-trash" /> Clear history
+                <i className="fa fa-trash"/> Clear history
               </Button>
             </Nav.Item>
           </NavbarCollapse>
@@ -200,131 +198,134 @@ export class Converter extends Component {
           show={this.state.modalIsOpen}
           onHide={() => this.closeModal()}
         />
+        {this.state.error &&
+        <Alert key="error" variant="danger">
+          {this.state.error.message}
+        </Alert>
+        }
         {this.state.stack.map((entry, i) => (
-          <Container key={`container-${i}`} fluid={true}>
-            <h4>#{this.state.stack.length - i}</h4>
-            {i === 0 && (
-              <Row>
-                <Col>
-                  {this.state.stack[i].error && (
-                    <Alert key="error" variant="danger">
-                      {this.state.stack[i].error.message}
-                    </Alert>
-                  )}
-                  <ButtonToolbar>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("hex", "text")}
-                    >
-                      Hex <i className="fa fa-caret-right" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("base64", "text")}
-                    >
-                      Base 64 <i className="fa fa-caret-right" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("url", "text")}
-                    >
-                      URL <i className="fa fa-caret-right" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("xml", "json")}
-                    >
-                      XML <i className="fa fa-caret-right" /> JSON
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("yaml", "json")}
-                    >
-                      YAML <i className="fa fa-caret-right" /> JSON
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("json", "yaml")}
-                    >
-                      JSON <i className="fa fa-caret-right" /> YAML
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "url")}
-                    >
-                      <i className="fa fa-caret-right" /> URL
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("jwt", "json")}
-                    >
-                      JWT <i className="fa fa-caret-right" /> JSON
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "hex")}
-                    >
-                      <i className="fa fa-caret-right" /> Hex
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "base64")}
-                    >
-                      <i className="fa fa-caret-right" /> Base 64
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "sha1")}
-                    >
-                      <i className="fa fa-caret-right" /> SHA-1
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "sha256")}
-                    >
-                      <i className="fa fa-caret-right" /> SHA-256
-                    </Button>
+          <React.Fragment>
+            <Container fluid={true}><h4>#{this.state.stack.length - i}</h4></Container>
+            {i === 0 && <Container fluid={true} style={{paddingBottom: '5px'}}>
+              <ButtonToolbar className="justify-content-between">
+                <ButtonGroup>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("base64", "text")}
+                  >
+                    Base 64 <i className="fa fa-caret-right"/>
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("hex", "text")}
+                  >
+                    Hex <i className="fa fa-caret-right"/>
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("url", "text")}
+                  >
+                    URL <i className="fa fa-caret-right"/>
+                  </Button>
+                </ButtonGroup>
+                <ButtonGroup>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("jwt", "json")}
+                  >
+                    JWT <i className="fa fa-caret-right"/> JSON
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("yaml", "json")}
+                  >
+                    YAML <i className="fa fa-caret-right"/> JSON
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("xml", "json")}
+                  >
+                    XML <i className="fa fa-caret-right"/> JSON
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("json", "yaml")}
+                  >
+                    JSON <i className="fa fa-caret-right"/> YAML
+                  </Button>
+                </ButtonGroup>
+                <ButtonGroup>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("text", "base64")}
+                  >
+                    <i className="fa fa-caret-right"/> Base 64
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("text", "hex")}
+                  >
+                    <i className="fa fa-caret-right"/> Hex
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("text", "sha1")}
+                  >
+                    <i className="fa fa-caret-right"/> SHA-1
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("text", "sha256")}
+                  >
+                    <i className="fa fa-caret-right"/> SHA-256
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => this.convert("text", "url")}
+                  >
+                    <i className="fa fa-caret-right"/> URL
+                  </Button>
+                </ButtonGroup>
+                <ButtonGroup>
+                  <CopyToClipboard
+                    text={this.state.stack[i].value}
+                    onCopy={() => {
+                      toast("Copied to clipboard");
+                    }}
+                  >
 
-                    <CopyToClipboard
-                      text={this.state.stack[i].value}
-                      onCopy={() => {
-                        toast("Copied to clipboard");
-                      }}
-                    >
-                      <Button variant="secondary" title="Copy to clipboard">
-                        <i className="fa fa-clipboard" /> Copy
-                      </Button>
-                    </CopyToClipboard>
-
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.undo()}
-                      title="Discard"
-                    >
-                      <i className="fa fa-times" /> Discard
+                    <Button variant="light" title="Copy to clipboard">
+                      <i className="fa fa-clipboard"/> Copy
                     </Button>
-                  </ButtonToolbar>
-                </Col>
-              </Row>
-            )}
-            <Row>
-              <Col>
-                <AceEditor
-                  mode={this.state.stack[i].type}
-                  theme="textmate"
-                  tabSize={2}
-                  name={`editor-${i}`}
-                  value={this.state.stack[i].value}
-                  readOnly={i > 0}
-                  width={"auto"}
-                  onChange={value => this.change(value)}
-                  annotations={this.state.stack[i].annotations || []}
-                />
-              </Col>
-            </Row>
-          </Container>
+                  </CopyToClipboard>
+
+                  <Button
+                    variant="light"
+                    onClick={() => this.undo()}
+                    title="Discard"
+                  >
+                    <i className="fa fa-times"/> Discard
+                  </Button>
+                </ButtonGroup>
+              </ButtonToolbar>
+            </Container>
+            }
+            <Container fluid={true} style={{paddingBottom: '5px'}}>
+              <AceEditor
+                mode={this.state.stack[i].type}
+                theme="textmate"
+                tabSize={2}
+                name={`editor-${i}`}
+                value={this.state.stack[i].value}
+                readOnly={i > 0}
+                width={"auto"}
+                onChange={value => this.change(value)}
+                annotations={this.state.stack[i].annotations || []}
+              />
+            </Container>
+          </React.Fragment>
         ))}
-        <ToastContainer />
+        <ToastContainer/>
         <Container fluid={true}>
           Icons made by{" "}
           <a href="https://www.flaticon.com/authors/freepik" title="Freepik">
