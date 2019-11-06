@@ -2,7 +2,11 @@ export const hexDecode = str1 => {
   const hex = str1.toString();
   let str = "";
   for (let n = 0; n < hex.length; n += 2) {
-    str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+    const code = parseInt(hex.substr(n, 2), 16);
+    if (isNaN(code)) {
+      throw new Error("invalid hex");
+    }
+    str += String.fromCharCode(code);
   }
   return str;
 };

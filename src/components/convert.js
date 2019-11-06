@@ -11,7 +11,11 @@ export const convert = (text, from, to) => {
 
   switch (from) {
     case "base64":
-      text = atob(text);
+      try {
+        text = atob(text);
+      } catch(e) {
+        throw new Error("invalid base64")
+      }
       break;
     case "hex":
       text = hexDecode(text);
