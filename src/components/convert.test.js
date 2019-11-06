@@ -12,7 +12,7 @@ test("text2hex", () => {
 });
 
 test("hex2text", () => {
-  expect(convert("666f6f", "text", "hex")).toBe(
+  expect(convert("666f6f", "hex", "text")).toBe(
     "foo"
   );
 });
