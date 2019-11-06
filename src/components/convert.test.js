@@ -1,10 +1,8 @@
 import { convert } from "./convert";
 
-
 test("base642text", () => {
   expect(convert("Zm9v", "base64", "text")).toBe("foo");
 });
-
 
 test("base2text-bad", () => {
   expect(() => convert("???", "base64", "text")).toThrow("invalid base64");
@@ -41,9 +39,15 @@ test("jwt2json", () => {
   );
 });
 test("xml2json", () => {
-  expect(convert(`<note>
+  expect(
+    convert(
+      `<note>
   <to>Tove</to>
-</note>`, "xml", "json")).toBe(`{
+</note>`,
+      "xml",
+      "json"
+    )
+  ).toBe(`{
   "note": {
     "to": "Tove"
   }
@@ -76,7 +80,5 @@ test("text2sha256", () => {
 });
 
 test("text2url", () => {
-  expect(convert("foo bar", "text", "url")).toBe(
-    "foo%20bar"
-  );
+  expect(convert("foo bar", "text", "url")).toBe("foo%20bar");
 });

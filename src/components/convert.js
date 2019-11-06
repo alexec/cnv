@@ -13,8 +13,8 @@ export const convert = (text, from, to) => {
     case "base64":
       try {
         text = atob(text);
-      } catch(e) {
-        throw new Error("invalid base64")
+      } catch (e) {
+        throw new Error("invalid base64");
       }
       break;
     case "hex":
