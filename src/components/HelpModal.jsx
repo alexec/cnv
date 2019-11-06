@@ -16,13 +16,10 @@ export const HelpModal = ({ show, onHide }) => (
     <Modal.Body>
       <blockquote>
         <p>
-          <b>Code Chameleon</b> is a tool to convert between the most common
-          encoding types.{" "}
+          <b>Code Chameleon</b> is a tool to convert between the most common encoding types.{" "}
         </p>
         <p>Why would you use this rather than other tools?</p>
-        <Alert variant="info">
-          Code Chameleon does not send your code to a third-party.
-        </Alert>
+        <Alert variant="info">Code Chameleon does not send your code to a third-party.</Alert>
       </blockquote>
     </Modal.Body>
 

@@ -40,20 +40,12 @@ module.exports = {
       filename: "./index.html"
     }),
     new BaseHrefWebpackPlugin({
-      baseHref:
-        process.env.NODE_ENV === "development"
-          ? "/"
-          : "https://alexec.github.io/cnv/"
+      baseHref: process.env.NODE_ENV === "development" ? "/" : "https://alexec.github.io/cnv/"
     }),
     new CspHtmlWebpackPlugin({
       "object-src": ["https://fonts.googleapis.com"],
       "script-src": ["'unsafe-inline'", "'self'", "'unsafe-eval'"],
-      "style-src": [
-        "'unsafe-inline'",
-        "'self'",
-        "'unsafe-eval'",
-        "https://stackpath.bootstrapcdn.com"
-      ]
+      "style-src": ["'unsafe-inline'", "'self'", "'unsafe-eval'", "https://stackpath.bootstrapcdn.com"]
     })
   ]
 };

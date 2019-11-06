@@ -12,13 +12,8 @@ test("hex2text", () => {
   expect(convert("666f6f", "hex", "text")).toBe("foo");
 });
 test("hex2text-newlines", () => {
-  expect(
-    convert(
-      "7ba202022666f6f223a20312ca202022626172223a205ba20202020322ca2020202033a20205d2ca20202262617a223a207ba2020202022717578223a2074727565a20207da7d",
-      "hex",
-      "text"
-    )
-  ).toBe(`{
+  expect(convert("7ba202022666f6f223a20312ca202022626172223a205ba20202020322ca2020202033a20205d2ca20202262617a223a207ba2020202022717578223a2074727565a20207da7d", "hex", "text"))
+    .toBe(`{
   "foo": 1,
   "bar": [
     2,
@@ -86,15 +81,11 @@ test("text2hex", () => {
 });
 
 test("text2sha1", () => {
-  expect(convert("foo", "text", "sha1")).toBe(
-    "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"
-  );
+  expect(convert("foo", "text", "sha1")).toBe("0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33");
 });
 
 test("text2sha256", () => {
-  expect(convert("foo", "text", "sha256")).toBe(
-    "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae"
-  );
+  expect(convert("foo", "text", "sha256")).toBe("2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae");
 });
 
 test("text2url", () => {

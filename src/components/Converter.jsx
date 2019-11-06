@@ -5,7 +5,6 @@ import sha1 from "sha1";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Nav from "react-bootstrap/Nav";
 import NavbarCollapse from "react-bootstrap/NavbarCollapse";
-import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-json";
@@ -20,12 +19,15 @@ import { HelpModal } from "./HelpModal";
 
 import "./styles.css";
 import { Logo } from "./logo";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
   type: "json"
 };
+
+const blank = { value: "", type: "text" };
 
 export class Converter extends Component {
   constructor(props) {
@@ -33,12 +35,8 @@ export class Converter extends Component {
     const item = this.readFromLocalStorage();
 
     this.state = item || {};
-    if (!Array.isArray(this.state.stack)) {
-      this.state.stack = [];
-    }
-    if (this.state.stack.length === 0) {
-      this.state.stack.push(example);
-    }
+    this.state.a = this.state.a || example;
+    this.state.b = this.state.b || blank;
   }
 
   readFromLocalStorage() {
@@ -52,13 +50,12 @@ export class Converter extends Component {
   }
 
   convert(from, to) {
-    const text = this.state.stack[0].value;
+    const text = this.state.a.value;
     try {
       const newText = convert(text, from, to);
 
       this.store(s => {
-        s.stack.unshift({ value: newText, type: to });
-        s.stack = s.stack.slice(0, 10);
+        s.b = { value: newText, type: to };
         s.error = null;
       });
     } catch (e) {
@@ -68,7 +65,7 @@ export class Converter extends Component {
           s.error = {
             message: "line " + (annotation.row + 1) + ": " + e.message
           };
-          s.stack[0].annotations = [annotation];
+          s.a.annotations = [annotation];
         } else {
           s.error = { message: e.message };
         }
@@ -86,29 +83,29 @@ export class Converter extends Component {
 
   type(type) {
     this.store(s => {
-      s.stack[0].type = type;
+      s.a.type = type;
     });
   }
 
   change(val) {
     this.store(s => {
-      s.stack[0].value = val;
+      s.a.value = val;
     });
   }
 
-  clearHistory() {
+  swap() {
     this.store(s => {
-      s.stack = [example];
+      const a = s.a;
+      s.a = s.b;
+      s.b = a;
+    });
+  }
+
+  clear() {
+    this.store(s => {
+      s.a = example;
+      s.b = blank;
       s.error = null;
-    });
-  }
-
-  undo() {
-    this.store(s => {
-      if (s.stack.length >= 2) {
-        s.stack.shift();
-        s.error = null;
-      }
     });
   }
 
@@ -141,13 +138,13 @@ export class Converter extends Component {
 
   openModal() {
     this.store(s => {
-      s.modalIsOpen = true;
+      s.modalIsClosed = false;
     });
   }
 
   closeModal() {
     this.store(s => {
-      s.modalIsOpen = false;
+      s.modalIsClosed = true;
     });
   }
 
@@ -161,22 +158,12 @@ export class Converter extends Component {
           <Navbar.Toggle />
           <NavbarCollapse className="justify-content-end">
             <Nav.Item>
-              <Button
-                onClick={() => this.openModal()}
-                title="Help"
-                variant="light"
-              >
+              <Button onClick={() => this.openModal()} title="Help" variant="light">
                 <i className="fa fa-question-circle" /> Help
               </Button>
             </Nav.Item>
             <Nav.Item>
-              <Button
-                onClick={() =>
-                  (document.location.href = "https://github.com/alexec/cnv")
-                }
-                title="Github"
-                variant="light"
-              >
+              <Button onClick={() => (document.location.href = "https://github.com/alexec/cnv")} title="Github" variant="light">
                 <i className="fa fa-github" /> Github
               </Button>
             </Nav.Item>
@@ -184,159 +171,134 @@ export class Converter extends Component {
               <Button
                 variant="light"
                 onClick={() => {
-                  this.clearHistory();
+                  this.clear();
                 }}
-                title="Clear history"
+                title="Clear"
               >
-                <i className="fa fa-trash" /> Clear history
+                <i className="fa fa-trash" /> Clear
               </Button>
             </Nav.Item>
           </NavbarCollapse>
         </Navbar>
 
-        <HelpModal
-          show={this.state.modalIsOpen}
-          onHide={() => this.closeModal()}
-        />
+        <HelpModal show={!this.state.modalIsClosed} onHide={() => this.closeModal()} />
         {this.state.error && (
           <Alert key="error" variant="danger">
             {this.state.error.message}
           </Alert>
         )}
-        {this.state.stack.map((entry, i) => (
-          <React.Fragment>
-            <Container fluid={true}>
-              <h4>#{this.state.stack.length - i}</h4>
-            </Container>
-            {i === 0 && (
-              <Container fluid={true} style={{ paddingBottom: "5px" }}>
-                <ButtonToolbar className="justify-content-between">
-                  <ButtonGroup>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("base64", "text")}
-                    >
-                      Base 64 <i className="fa fa-caret-right" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("hex", "text")}
-                    >
-                      Hex <i className="fa fa-caret-right" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("url", "text")}
-                    >
-                      URL <i className="fa fa-caret-right" />
-                    </Button>
-                  </ButtonGroup>
-                  <ButtonGroup>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("jwt", "json")}
-                    >
-                      JWT <i className="fa fa-caret-right" /> JSON
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("yaml", "json")}
-                    >
-                      YAML <i className="fa fa-caret-right" /> JSON
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("xml", "json")}
-                    >
-                      XML <i className="fa fa-caret-right" /> JSON
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("json", "yaml")}
-                    >
-                      JSON <i className="fa fa-caret-right" /> YAML
-                    </Button>
-                  </ButtonGroup>
-                  <ButtonGroup>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "base64")}
-                    >
-                      <i className="fa fa-caret-right" /> Base 64
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "hex")}
-                    >
-                      <i className="fa fa-caret-right" /> Hex
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "sha1")}
-                    >
-                      <i className="fa fa-caret-right" /> SHA-1
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "sha256")}
-                    >
-                      <i className="fa fa-caret-right" /> SHA-256
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => this.convert("text", "url")}
-                    >
-                      <i className="fa fa-caret-right" /> URL
-                    </Button>
-                  </ButtonGroup>
-                  <ButtonGroup>
-                    <CopyToClipboard
-                      text={this.state.stack[i].value}
-                      onCopy={() => {
-                        toast("Copied to clipboard");
-                      }}
-                    >
-                      <Button variant="light" title="Copy to clipboard">
-                        <i className="fa fa-clipboard" /> Copy
-                      </Button>
-                    </CopyToClipboard>
-
-                    <Button
-                      variant="light"
-                      onClick={() => this.undo()}
-                      title="Discard"
-                    >
-                      <i className="fa fa-times" /> Discard
-                    </Button>
-                  </ButtonGroup>
-                </ButtonToolbar>
-              </Container>
-            )}
-            <Container fluid={true} style={{ paddingBottom: "5px" }}>
+        <Container fluid={true} style={{ paddingTop: "5px" }}>
+          <Row>
+            <Col sm={5}>
+              <h4>{this.state.a.type}</h4>
+            </Col>
+            <Col sm={2} style={{ textAlign: "center" }}>
+              <Button variant="secondary" onClick={() => this.swap()}>
+                <i className="fa fa-arrow-left" />
+                <i className="fa fa-arrow-right" />
+              </Button>
+            </Col>
+            <Col sm={5}>
+              <h4>
+                {this.state.b.type}{" "}
+                <CopyToClipboard
+                  text={this.state.b.value}
+                  onCopy={() => {
+                    toast("Copied to clipboard");
+                  }}
+                >
+                  <Button variant="light" title="Copy to clipboard">
+                    <i className="fa fa-clipboard" /> Copy
+                  </Button>
+                </CopyToClipboard>
+              </h4>
+            </Col>
+          </Row>
+          <Row>
+            <Col sm={5}>
               <AceEditor
-                mode={this.state.stack[i].type}
+                mode={this.state.a.type}
                 theme="textmate"
                 tabSize={2}
-                name={`editor-${i}`}
-                value={this.state.stack[i].value}
-                readOnly={i > 0}
+                name={`editor-a`}
+                value={this.state.a.value}
+                readOnly={false}
                 width={"auto"}
                 onChange={value => this.change(value)}
-                annotations={this.state.stack[i].annotations || []}
+                annotations={this.state.a.annotations || []}
               />
-            </Container>
-          </React.Fragment>
-        ))}
+            </Col>
+            <Col sm={2} style={{ textAlign: "center", verticalAlign: "center" }}>
+              <p>
+                <Button variant="secondary" onClick={() => this.convert("base64", "text")} title={"Convert from Base 64"}>
+                  Base 64 <i className="fa fa-caret-right" />
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("hex", "text")} title={"Convert from hex"}>
+                  Hex <i className="fa fa-caret-right" />
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("url", "text")} title={"Convert from URL"}>
+                  URL <i className="fa fa-caret-right" />
+                </Button>
+              </p>
+              <p>
+                <Button variant="secondary" onClick={() => this.convert("jwt", "json")} title={"Convert from JWT to JSON"}>
+                  JWT <i className="fa fa-caret-right" /> JSON
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("yaml", "json")} title={"Convert from YAML to JSON"}>
+                  YAML <i className="fa fa-caret-right" /> JSON
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("xml", "json")} title={"Convert from XML to JSON"}>
+                  XML <i className="fa fa-caret-right" /> JSON
+                </Button>
+              </p>
+              <p>
+                <Button variant="secondary" onClick={() => this.convert("json", "yaml")} title={"Convert from JSON to YAML"}>
+                  JSON <i className="fa fa-caret-right" /> YAML
+                </Button>
+              </p>
+              <p>
+                <Button variant="secondary" onClick={() => this.convert("text", "base64")} title={"Convert to base 64"}>
+                  <i className="fa fa-caret-right" /> Base 64
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("text", "hex")} title={"Convert to hex"}>
+                  <i className="fa fa-caret-right" /> Hex
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("text", "sha1")} title={"Convert to SHA-1"}>
+                  <i className="fa fa-caret-right" /> SHA-1
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("text", "sha256")} title={"Convert to SHA-256"}>
+                  <i className="fa fa-caret-right" /> SHA-256
+                </Button>
+                <br />
+                <Button variant="secondary" onClick={() => this.convert("text", "url")} title={"Convert to URL"}>
+                  <i className="fa fa-caret-right" /> URL
+                </Button>
+              </p>
+            </Col>
+            <Col sm={5}>
+              <AceEditor mode={this.state.b.type} theme="textmate" tabSize={2} name={`editor-b`} value={this.state.b.value} readOnly={true} width={"auto"} />
+            </Col>
+          </Row>
+        </Container>
         <ToastContainer />
         <Container fluid={true}>
-          Icons made by{" "}
-          <a href="https://www.flaticon.com/authors/freepik" title="Freepik">
-            Freepik
-          </a>{" "}
-          from{" "}
-          <a href="https://www.flaticon.com/" title="Flaticon">
-            www.flaticon.com
-          </a>
+          <small>
+            Icons made by{" "}
+            <a href="https://www.flaticon.com/authors/freepik" title="Freepik">
+              Freepik
+            </a>{" "}
+            from{" "}
+            <a href="https://www.flaticon.com/" title="Flaticon">
+              www.flaticon.com
+            </a>
+          </small>
         </Container>
       </React.Fragment>
     );
