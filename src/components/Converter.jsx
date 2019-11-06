@@ -216,73 +216,73 @@ export class Converter extends Component {
                       variant="secondary"
                       onClick={() => this.convert("hex", "text")}
                     >
-                      Hex &rarr;
+                      Hex <i className="fa fa-caret-right" />
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("base64", "text")}
                     >
-                      Base 64 &rarr;
+                      Base 64 <i className="fa fa-caret-right" />
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("url", "text")}
                     >
-                      URL &rarr;{" "}
+                      URL <i className="fa fa-caret-right" />
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("xml", "json")}
                     >
-                      XML &rarr; JSON
+                      XML <i className="fa fa-caret-right" /> JSON
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("yaml", "json")}
                     >
-                      YAML &rarr; JSON
+                      YAML <i className="fa fa-caret-right" /> JSON
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("json", "yaml")}
                     >
-                      JSON &rarr; YAML
+                      JSON <i className="fa fa-caret-right" /> YAML
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("text", "url")}
                     >
-                      &rarr; URL
+                      <i className="fa fa-caret-right" /> URL
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("jwt", "json")}
                     >
-                      JWT &rarr; JSON
+                      JWT <i className="fa fa-caret-right" /> JSON
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("text", "hex")}
                     >
-                      &rarr; Hex
+                      <i className="fa fa-caret-right" /> Hex
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("text", "base64")}
                     >
-                      &rarr; Base 64
+                      <i className="fa fa-caret-right" /> Base 64
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("text", "sha1")}
                     >
-                      &rarr; SHA-1
+                      <i className="fa fa-caret-right" /> SHA-1
                     </Button>
                     <Button
                       variant="secondary"
                       onClick={() => this.convert("text", "sha256")}
                     >
-                      &rarr; SHA-256
+                      <i className="fa fa-caret-right" /> SHA-256
                     </Button>
 
                     <CopyToClipboard
