@@ -1,21 +1,20 @@
-export const hexDecode = str1 => {
-  const hex = str1.toString();
-  let str = "";
+export const hexDecode = hex => {
+  let text = "";
   for (let n = 0; n < hex.length; n += 2) {
-    const code = parseInt(hex.substr(n, 2), 16);
+    let s = hex.substr(n, 2);
+    const code = parseInt(s, 16);
     if (isNaN(code)) {
       throw new Error("invalid hex");
     }
-    str += String.fromCharCode(code);
+    text += String.fromCharCode(code);
   }
-  return str;
+  return text;
 };
 
 export const hexEncode = str => {
-  const arr1 = [];
+  let hex = "";
   for (let n = 0, l = str.length; n < l; n++) {
-    const hex = Number(str.charCodeAt(n)).toString(16);
-    arr1.push(hex);
+    hex += Number(str.charCodeAt(n)).toString(16);
   }
-  return arr1.join("");
+  return hex;
 };

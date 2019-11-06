@@ -24,7 +24,7 @@ export const convert = (text, from, to) => {
       obj = JSON.parse(text);
       break;
     case "jwt":
-      text = JSON.stringify(JWT.decode(text, { complete: true }));
+      obj = JWT.decode(text, { complete: true });
       break;
     case "text":
     case "sha1":
@@ -43,15 +43,16 @@ export const convert = (text, from, to) => {
       throw new Error("cannot convert from " + from);
   }
 
+  if (obj !== null) {
+    text = JSON.stringify(obj);
+  }
+
   switch (to) {
     case "base64":
       return btoa(text);
     case "hex":
       return hexEncode(text);
     case "json":
-      if (obj === null) {
-        obj = JSON.parse(text);
-      }
       return JSON.stringify(obj, null, 2);
     case "sha1":
       return sha1(text);
@@ -62,9 +63,6 @@ export const convert = (text, from, to) => {
     case "url":
       return encodeURI(text);
     case "yaml":
-      if (obj === null) {
-        obj = YAML.parse(text);
-      }
       return YAML.stringify(obj);
     default:
       throw new Error("cannot convert to " + to);
