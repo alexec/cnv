@@ -43,8 +43,8 @@ const types = {
   yaml: { name: "YAML" },
   hex: { name: "Hex" },
   base64: { name: "Base 64" },
-  sha1: { name: "SHA1" },
-  sha256: { name: "SHA256" },
+  sha1: { name: "SHA-1" },
+  sha256: { name: "SHA-256" },
   url: { name: "URL" },
   xml: { name: "XML" }
 };

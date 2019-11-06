@@ -5,6 +5,17 @@ test("json2yaml", () => {
 `);
 });
 
+test("text2hex", () => {
+  expect(convert("foo", "text", "hex")).toBe(
+    "666f6f"
+  );
+});
+
+test("hex2text", () => {
+  expect(convert("666f6f", "text", "hex")).toBe(
+    "foo"
+  );
+});
 test("text2sha1", () => {
   expect(convert("foo", "text", "sha1")).toBe(
     "0beec7b5ea3f0fdbc95d0dd47f3c5bc275da8a33"

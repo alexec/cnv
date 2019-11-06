@@ -2,6 +2,7 @@ import JWT from "jsonwebtoken";
 import parser from "fast-xml-parser";
 import YAML from "yaml";
 import sha1 from "sha1";
+import { hexDecode, hexEncode } from "./hex";
 
 const sha256 = require("js-sha256").sha256;
 
@@ -13,7 +14,7 @@ export const convert = (text, from, to) => {
       text = atob(text);
       break;
     case "hex":
-      text = this.hexDecode(text);
+      text = hexDecode(text);
       break;
     case "json":
       obj = JSON.parse(text);
@@ -42,7 +43,7 @@ export const convert = (text, from, to) => {
     case "base64":
       return btoa(text);
     case "hex":
-      return this.hexEncode(text);
+      return hexEncode(text);
     case "json":
       if (obj === null) {
         obj = JSON.parse(text);
