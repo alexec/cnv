@@ -2,6 +2,8 @@ import Modal from "react-bootstrap/Modal";
 import { Button } from "react-bootstrap";
 import React from "react";
 import { Logo } from "./logo";
+import Jumbotron from "react-bootstrap/Jumbotron";
+import Alert from "react-bootstrap/Alert";
 
 export const HelpModal = ({ show, onHide }) => (
   <Modal show={show} onHide={() => onHide()}>
@@ -18,10 +20,9 @@ export const HelpModal = ({ show, onHide }) => (
           encoding types.{" "}
         </p>
         <p>Why would you use this rather than other tools?</p>
-        <ul>
-          <li>Does not send your code to a third-party.</li>
-          <li>Supports 10 different encodings.</li>
-        </ul>
+        <Alert variant="info">
+          Code Chameleon does not send your code to a third-party.
+        </Alert>
       </blockquote>
     </Modal.Body>
 
