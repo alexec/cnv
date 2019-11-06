@@ -1,15 +1,5 @@
 import React, { Component } from "react";
-import {
-  Alert,
-  Button,
-  ButtonGroup,
-  Col,
-  Container,
-  Navbar,
-  Row
-} from "react-bootstrap";
-import YAML from "yaml";
-import JWT from "jsonwebtoken";
+import { Alert, Button, Col, Container, Navbar, Row } from "react-bootstrap";
 import sha1 from "sha1";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -34,19 +24,6 @@ import { Logo } from "./logo";
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
   type: "json"
-};
-
-const types = {
-  text: { name: "Text" },
-  json: { name: "JSON" },
-  jwt: { name: "JWT" },
-  yaml: { name: "YAML" },
-  hex: { name: "Hex" },
-  base64: { name: "Base 64" },
-  sha1: { name: "SHA-1" },
-  sha256: { name: "SHA-256" },
-  url: { name: "URL" },
-  xml: { name: "XML" }
 };
 
 export class Converter extends Component {
@@ -77,9 +54,9 @@ export class Converter extends Component {
     return item;
   }
 
-  convert(to) {
+  convert(from, to) {
+    from = from || this.state.stack[0].type;
     const text = this.state.stack[0].value;
-    const from = this.state.stack[0].type;
 
     try {
       const newText = convert(text, from, to);
@@ -234,78 +211,98 @@ export class Converter extends Component {
                       {this.state.stack[i].error.message}
                     </Alert>
                   )}
-                  <ButtonToolbar className="justify-content-between">
-                    <ButtonGroup>
-                      <Button disabled>From:</Button>
-                      {[
-                        "text",
-                        "json",
-                        "yaml",
-                        "xml",
-                        "hex",
-                        "base64",
-                        "jwt",
-                        "url"
-                      ].map(type => (
-                        <Button
-                          key={`button-type-${i}-${type}`}
-                          variant={`${
-                            this.state.stack[i].type === type
-                              ? "primary"
-                              : "secondary"
-                          }`}
-                          onClick={() => {
-                            this.type(type);
-                          }}
-                        >
-                          {types[type].name}
-                        </Button>
-                      ))}
-                    </ButtonGroup>
-                    <ButtonGroup>
-                      <Button disabled>To:</Button>
-                      {[
-                        "text",
-                        "json",
-                        "yaml",
-                        "hex",
-                        "base64",
-                        "sha1",
-                        "sha256",
-                        "url"
-                      ].map(type => (
-                        <Button
-                          key={`button-convert-${i}-${type}`}
-                          variant={`${
-                            this.state.stack[i].type === type
-                              ? "primary"
-                              : "secondary"
-                          }`}
-                          onClick={() => {
-                            this.convert(type);
-                          }}
-                        >
-                          {types[type].name}
-                        </Button>
-                      ))}
-                    </ButtonGroup>
-                    &nbsp;
-                    <ButtonGroup>
-                      <CopyToClipboard
-                        text={this.state.stack[i].value}
-                        onCopy={() => {
-                          toast("Copied to clipboard");
-                        }}
-                      >
-                        <Button variant="secondary" title="Copy to clipboard">
-                          <i className="fa fa-clipboard" /> Copy
-                        </Button>
-                      </CopyToClipboard>
+                  <ButtonToolbar>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("hex", "text")}
+                    >
+                      Hex &rarr;
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("base64", "text")}
+                    >
+                      Base 64 &rarr;
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("url", "text")}
+                    >
+                      URL &rarr;{" "}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("xml", "json")}
+                    >
+                      XML &rarr; JSON
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("yaml", "json")}
+                    >
+                      YAML &rarr; JSON
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("json", "yaml")}
+                    >
+                      JSON &rarr; YAML
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "url")}
+                    >
+                      &rarr; URL
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("jwt", "json")}
+                    >
+                      JWT &rarr; JSON
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "hex")}
+                    >
+                      &rarr; Hex
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "base64")}
+                    >
+                      &rarr; Base 64
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "sha1")}
+                    >
+                      &rarr; SHA-1
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.convert("text", "sha256")}
+                    >
+                      &rarr; SHA-256
+                    </Button>
 
-                      <Button onClick={() => this.undo()} title="Discard">
-                        <i className="fa fa-times" /> Discard
+                    <CopyToClipboard
+                      text={this.state.stack[i].value}
+                      onCopy={() => {
+                        toast("Copied to clipboard");
+                      }}
+                    >
+                      <Button variant="secondary" title="Copy to clipboard">
+                        <i className="fa fa-clipboard" /> Copy
                       </Button>
-                    </ButtonGroup>
+                    </CopyToClipboard>
+
+                    <Button
+                      variant="secondary"
+                      onClick={() => this.undo()}
+                      title="Discard"
+                    >
+                      <i className="fa fa-times" /> Discard
+                    </Button>
                   </ButtonToolbar>
                 </Col>
               </Row>
@@ -328,7 +325,7 @@ export class Converter extends Component {
           </Container>
         ))}
         <ToastContainer />
-        <p>
+        <Container fluid={true}>
           Icons made by{" "}
           <a href="https://www.flaticon.com/authors/freepik" title="Freepik">
             Freepik
@@ -337,7 +334,7 @@ export class Converter extends Component {
           <a href="https://www.flaticon.com/" title="Flaticon">
             www.flaticon.com
           </a>
-        </p>
+        </Container>
       </React.Fragment>
     );
   }

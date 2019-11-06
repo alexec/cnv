@@ -20,7 +20,7 @@ export const convert = (text, from, to) => {
       obj = JSON.parse(text);
       break;
     case "jwt":
-      text = JSON.stringify(JWT.decode(text));
+      text = JSON.stringify(JWT.decode(text, { complete: true }));
       break;
     case "text":
     case "sha1":
