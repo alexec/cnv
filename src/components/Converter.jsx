@@ -24,10 +24,11 @@ import Row from "react-bootstrap/Row";
 
 const example = {
   value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
-  type: "json"
+  type: "json",
+  types: ["json"]
 };
 
-const blank = { value: "", type: "text" };
+const blank = { value: "", type: "text", types: ["text"] };
 
 export class Converter extends Component {
   constructor(props) {
@@ -37,6 +38,8 @@ export class Converter extends Component {
     this.state = item || {};
     this.state.a = this.state.a || example;
     this.state.b = this.state.b || blank;
+    this.state.a.types = this.state.a.types || [this.state.a.type];
+    this.state.b.types = this.state.b.types || [this.state.b.type];
   }
 
   readFromLocalStorage() {
@@ -49,13 +52,26 @@ export class Converter extends Component {
     return item;
   }
 
+  detectTypes(text) {
+    const types = [];
+    ["base64", "hex", "url", "json", "jwt", "yaml", "xml"].forEach(type => {
+      try {
+        if (type === "yaml" && types.includes("json")) {
+          throw new Error();
+        }
+        convert(text, type, "text");
+        types.push(type);
+      } catch (ignored) {}
+    });
+    return types;
+  }
+
   convert(from, to) {
     const text = this.state.a.value;
     try {
       const newText = convert(text, from, to);
-
       this.store(s => {
-        s.b = { value: newText, type: to };
+        s.b = { value: newText, type: to, types: [to] };
         s.error = null;
       });
     } catch (e) {
@@ -90,6 +106,7 @@ export class Converter extends Component {
   change(val) {
     this.store(s => {
       s.a.value = val;
+      s.a.types = this.detectTypes(val);
     });
   }
 
@@ -190,7 +207,7 @@ export class Converter extends Component {
         <Container fluid={true} style={{ paddingTop: "5px" }}>
           <Row>
             <Col sm={5}>
-              <h4>{this.state.a.type}</h4>
+              <h4>{(this.state.a.types || []).map(type => this.formatType(type)).join(", ")}</h4>
             </Col>
             <Col sm={2} style={{ textAlign: "center" }}>
               <Button variant="secondary" onClick={() => this.swap()}>
@@ -200,7 +217,7 @@ export class Converter extends Component {
             </Col>
             <Col sm={5}>
               <h4>
-                {this.state.b.type}{" "}
+                <h4>{(this.state.a.types || []).map(type => this.formatType(type)).join(", ")}</h4>
                 <CopyToClipboard
                   text={this.state.b.value}
                   onCopy={() => {
@@ -230,33 +247,38 @@ export class Converter extends Component {
             </Col>
             <Col sm={2} style={{ textAlign: "center", verticalAlign: "center" }}>
               <p>
-                <Button variant="secondary" onClick={() => this.convert("base64", "text")} title={"Convert from Base 64"}>
+                <Button variant="secondary" onClick={() => this.convert(this.state.a.type, this.state.a.type)} title={"Pretty"}>
+                  <i className="fa fa-code" /> Pretty
+                </Button>
+              </p>
+              <p>
+                <Button variant="secondary" onClick={() => this.convert("base64", "text")} title={"Convert from Base 64"} disabled={!this.state.a.types.includes("base64")}>
                   Base 64 <i className="fa fa-caret-right" />
                 </Button>
                 <br />
-                <Button variant="secondary" onClick={() => this.convert("hex", "text")} title={"Convert from hex"}>
+                <Button variant="secondary" onClick={() => this.convert("hex", "text")} title={"Convert from hex"} disabled={!this.state.a.types.includes("hex")}>
                   Hex <i className="fa fa-caret-right" />
                 </Button>
                 <br />
-                <Button variant="secondary" onClick={() => this.convert("url", "text")} title={"Convert from URL"}>
+                <Button variant="secondary" onClick={() => this.convert("url", "text")} title={"Convert from URL"} disabled={!this.state.a.types.includes("url")}>
                   URL <i className="fa fa-caret-right" />
                 </Button>
               </p>
               <p>
-                <Button variant="secondary" onClick={() => this.convert("jwt", "json")} title={"Convert from JWT to JSON"}>
+                <Button variant="secondary" onClick={() => this.convert("jwt", "json")} title={"Convert from JWT to JSON"} disabled={!this.state.a.types.includes("jwt")}>
                   JWT <i className="fa fa-caret-right" /> JSON
                 </Button>
                 <br />
-                <Button variant="secondary" onClick={() => this.convert("yaml", "json")} title={"Convert from YAML to JSON"}>
+                <Button variant="secondary" onClick={() => this.convert("yaml", "json")} title={"Convert from YAML to JSON"} disabled={!this.state.a.types.includes("yaml")}>
                   YAML <i className="fa fa-caret-right" /> JSON
                 </Button>
                 <br />
-                <Button variant="secondary" onClick={() => this.convert("xml", "json")} title={"Convert from XML to JSON"}>
+                <Button variant="secondary" onClick={() => this.convert("xml", "json")} title={"Convert from XML to JSON"} disabled={!this.state.a.types.includes("xml")}>
                   XML <i className="fa fa-caret-right" /> JSON
                 </Button>
               </p>
               <p>
-                <Button variant="secondary" onClick={() => this.convert("json", "yaml")} title={"Convert from JSON to YAML"}>
+                <Button variant="secondary" onClick={() => this.convert("json", "yaml")} title={"Convert from JSON to YAML"} disabled={!this.state.a.types.includes("json")}>
                   JSON <i className="fa fa-caret-right" /> YAML
                 </Button>
               </p>
@@ -302,6 +324,20 @@ export class Converter extends Component {
         </Container>
       </React.Fragment>
     );
+  }
+
+  formatType(type) {
+    return {
+      base64: "Base 64",
+      hex: "Hex",
+      json: "JSON",
+      jwt: "JWT",
+      sha1: "SHA-1",
+      sha2356: "SHA-256",
+      xml: "XML",
+      yaml: "YAML",
+      url: "URL"
+    }[type];
   }
 }
 

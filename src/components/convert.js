@@ -25,6 +25,9 @@ export const convert = (text, from, to) => {
       break;
     case "jwt":
       obj = JWT.decode(text, { complete: true });
+      if (obj === null) {
+        throw new Error("invalid JWT");
+      }
       break;
     case "text":
     case "sha1":
@@ -34,6 +37,9 @@ export const convert = (text, from, to) => {
       obj = parser.parse(text, {}, true);
       break;
     case "url":
+      if (text.indexOf("\n") >= 0) {
+        throw new Error("invalid URL");
+      }
       text = decodeURI(text);
       break;
     case "yaml":

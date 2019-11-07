@@ -38,6 +38,19 @@ test("jwt2text", () => {
 }`
   );
 });
+
+test("jwt2text-bad", () => {
+  expect(() => convert("???", "jwt", "json")).toThrow("invalid JWT");
+});
+
+test("url2text", () => {
+  expect(convert("foo%20bar", "url", "text")).toBe("foo bar");
+});
+
+test("url2text-bad", () => {
+  expect(() => convert(`\n`, "url", "text")).toThrow("invalid URL");
+});
+
 test("xml2json", () => {
   expect(
     convert(
