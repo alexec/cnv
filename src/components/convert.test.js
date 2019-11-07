@@ -54,6 +54,10 @@ test("xml2json", () => {
 }`);
 });
 
+test("xml2json-bar", () => {
+  expect(() => convert(``, "xml", "json")).toThrow("Start tag expected.");
+});
+
 test("json2yaml", () => {
   expect(convert(`{"a":1}`, "json", "yaml")).toBe(`a: 1
 `);

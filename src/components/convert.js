@@ -31,7 +31,7 @@ export const convert = (text, from, to) => {
     case "sha256":
       break;
     case "xml":
-      obj = parser.parse(text, {});
+      obj = parser.parse(text, {}, true);
       break;
     case "url":
       text = decodeURI(text);
