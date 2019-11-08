@@ -21,11 +21,30 @@ import "./styles.css";
 import { Logo } from "./logo";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
+import YAML from "yaml";
 
-const example = {
-  value: JSON.stringify({ foo: 1, bar: [2, 3], baz: { qux: true } }, null, 2),
-  type: "json",
-  types: ["json"]
+const examples = {
+  base64: "SGVsbG8gV29ybGQh",
+  hex: "48656c6c6f20576f726c6421",
+  json: JSON.stringify({ hello: "World!" }, null, 2),
+  jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0IiwibmFtZSI6IkhlbGxvIFdvcmxkISIsImlhdCI6NTY3OH0.Z8e1JNb8vgSxmahjSEztZBwWfA1l4xr5A98D5kp-aGI",
+  text: "Hello World!",
+  url: "Hello%20World!",
+  xml: `<hello><![CDATA[World!]]></hello>`,
+  yaml: YAML.stringify({ hello: "World!" })
+};
+
+const types = {
+  base64: { name: "Base 64", to: ["text"] },
+  hex: { name: "Hex", to: ["text"] },
+  json: { name: "JSON", to: ["base64", "hex", "sha1", "sha256", "url", "yaml"] },
+  jwt: { name: "JWT", to: ["json"] },
+  sha1: { name: "SHA-1", to: [] },
+  sha256: { name: "SHA-256", to: [] },
+  text: { name: "Text", to: ["base64", "hex", "sha1", "sha256", "url"] },
+  xml: { name: "XML", to: ["json", "yaml"] },
+  yaml: { name: "YAML", to: ["base64", "hex", "json", "sha1", "sha256", "url"] },
+  url: { name: "URL", to: ["text"] }
 };
 
 const blank = { value: "", type: "text", types: ["text"] };
@@ -36,8 +55,12 @@ export class Converter extends Component {
     const item = this.readFromLocalStorage();
 
     this.state = item || {};
-    this.state.a = this.state.a || example;
+    this.state.a = this.state.a || blank;
     this.state.b = this.state.b || blank;
+    this.state.a = typeof this.state.a === "object" ? this.state.a : blank;
+    this.state.b = typeof this.state.b === "object" ? this.state.b : blank;
+    this.state.a.type = this.state.a.type || blank.type;
+    this.state.b.type = this.state.b.type || blank.type;
     this.state.a.types = this.state.a.types || [this.state.a.type];
     this.state.b.types = this.state.b.types || [this.state.b.type];
   }
@@ -71,6 +94,7 @@ export class Converter extends Component {
     try {
       const newText = convert(text, from, to);
       this.store(s => {
+        s.a.type = from;
         s.b = { value: newText, type: to, types: [to] };
         s.error = null;
       });
@@ -111,6 +135,8 @@ export class Converter extends Component {
     this.store(s => {
       s.a.value = val;
       s.a.types = this.detectTypes(val);
+      s.a.annotations = [];
+      s.error = null;
     });
   }
 
@@ -119,12 +145,14 @@ export class Converter extends Component {
       const a = s.a;
       s.a = s.b;
       s.b = a;
+      s.a.annotations = [];
+      s.error = null;
     });
   }
 
   clear() {
     this.store(s => {
-      s.a = example;
+      s.a = blank;
       s.b = blank;
       s.error = null;
     });
@@ -169,6 +197,25 @@ export class Converter extends Component {
     });
   }
 
+  example(type) {
+    this.store(s => {
+      s.a = { value: examples[type], type: type, types: [type] };
+      s.error = null;
+    });
+  }
+
+  pretty() {
+    try {
+      const newText = convert(this.state.a.value, this.state.a.type, this.state.a.type);
+      this.store(s => {
+        s.a.value = newText;
+        s.error = null;
+      });
+    } catch (e) {
+      this.annotate(this.state.a.value, e);
+    }
+  }
+
   render() {
     return (
       <React.Fragment>
@@ -211,33 +258,40 @@ export class Converter extends Component {
         <Container fluid={true} style={{ paddingTop: "5px" }}>
           <Row>
             <Col sm={5}>
-              <h4>{(this.state.a.types || []).map(type => this.formatType(type)).join(", ")}</h4>
+              <h4>
+                <Button variant="secondary" onClick={() => this.pretty()}>
+                  <i className="fa fa-code" /> Pretty
+                </Button>
+                <span className={"pull-right"}>{types[this.state.a.type].name}</span>
+              </h4>
             </Col>
             <Col sm={2} style={{ textAlign: "center" }}>
               <Button variant="secondary" onClick={() => this.swap()}>
                 <i className="fa fa-arrow-left" />
-                <i className="fa fa-arrow-right" />
+                <i className="fa fa-arrow-right" /> Swap
               </Button>
             </Col>
             <Col sm={5}>
               <h4>
                 <h4>
-                  {(this.state.b.types || []).map(type => this.formatType(type)).join(", ")}{" "}
-                  <CopyToClipboard
-                    text={this.state.b.value}
-                    onCopy={() => {
-                      toast("Copied to clipboard");
-                    }}
-                  >
-                    <Button variant="light" title="Copy to clipboard">
-                      <i className="fa fa-clipboard" /> Copy
-                    </Button>
-                  </CopyToClipboard>
+                  <span>{(this.state.b.types || []).map(type => types[type].name).join(", ")}</span>
+                  <span className={"pull-right"}>
+                    <CopyToClipboard
+                      text={this.state.b.value}
+                      onCopy={() => {
+                        toast("Copied to clipboard");
+                      }}
+                    >
+                      <Button variant="light" title="Copy to clipboard">
+                        <i className="fa fa-clipboard" /> Copy
+                      </Button>
+                    </CopyToClipboard>
+                  </span>
                 </h4>
               </h4>
             </Col>
           </Row>
-          <Row>
+          <Row className="align-items-center">
             <Col sm={5}>
               <AceEditor
                 mode={this.state.a.type}
@@ -251,64 +305,62 @@ export class Converter extends Component {
                 annotations={this.state.a.annotations || []}
               />
             </Col>
-            <Col sm={2} style={{ textAlign: "center", verticalAlign: "center" }}>
-              <p>
-                <Button variant="secondary" onClick={() => this.convert(this.state.a.type, this.state.a.type)} title={"Pretty"}>
-                  <i className="fa fa-code" /> Pretty <i className="fa fa-caret-right" />
-                </Button>
-              </p>
-              <p>
-                <Button variant="secondary" onClick={() => this.convert("base64", "text")} title={"Convert from Base 64"} disabled={!this.state.a.types.includes("base64")}>
-                  Base 64 <i className="fa fa-caret-right" />
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("hex", "text")} title={"Convert from hex"} disabled={!this.state.a.types.includes("hex")}>
-                  Hex <i className="fa fa-caret-right" />
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("url", "text")} title={"Convert from URL"} disabled={!this.state.a.types.includes("url")}>
-                  URL <i className="fa fa-caret-right" />
-                </Button>
-              </p>
-              <p>
-                <Button variant="secondary" onClick={() => this.convert("jwt", "json")} title={"Convert from JWT to JSON"} disabled={!this.state.a.types.includes("jwt")}>
-                  JWT <i className="fa fa-caret-right" /> JSON
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("yaml", "json")} title={"Convert from YAML to JSON"} disabled={!this.state.a.types.includes("yaml")}>
-                  YAML <i className="fa fa-caret-right" /> JSON
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("xml", "json")} title={"Convert from XML to JSON"} disabled={!this.state.a.types.includes("xml")}>
-                  XML <i className="fa fa-caret-right" /> JSON
-                </Button>
-              </p>
-              <p>
-                <Button variant="secondary" onClick={() => this.convert("json", "yaml")} title={"Convert from JSON to YAML"} disabled={!this.state.a.types.includes("json")}>
-                  JSON <i className="fa fa-caret-right" /> YAML
-                </Button>
-              </p>
-              <p>
-                <Button variant="secondary" onClick={() => this.convert("text", "base64")} title={"Convert to base 64"}>
-                  <i className="fa fa-caret-right" /> Base 64
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("text", "hex")} title={"Convert to hex"}>
-                  <i className="fa fa-caret-right" /> Hex
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("text", "sha1")} title={"Convert to SHA-1"}>
-                  <i className="fa fa-caret-right" /> SHA-1
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("text", "sha256")} title={"Convert to SHA-256"}>
-                  <i className="fa fa-caret-right" /> SHA-256
-                </Button>
-                <br />
-                <Button variant="secondary" onClick={() => this.convert("text", "url")} title={"Convert to URL"}>
-                  <i className="fa fa-caret-right" /> URL
-                </Button>
-              </p>
+            <Col sm={1} style={{ textAlign: "center", verticalAlign: "center" }}>
+              {this.state.a === blank ? (
+                <React.Fragment>
+                  <Button variant="secondary" onClick={() => this.example("base64")}>
+                    Base 64
+                  </Button>
+                  <br />
+                  <Button variant="secondary" onClick={() => this.example("hex")}>
+                    Hex
+                  </Button>
+                  <br />
+                  <Button variant="secondary" onClick={() => this.example("json")}>
+                    JSON
+                  </Button>
+                  <br />
+                  <Button variant="secondary" onClick={() => this.example("jwt")}>
+                    JWT
+                  </Button>
+                  <br />
+                  <Button variant="secondary" onClick={() => this.example("text")}>
+                    Text
+                  </Button>
+                  <br />
+                  <Button variant="secondary" onClick={() => this.example("xml")}>
+                    XML
+                  </Button>
+                  <br />
+                  <Button variant="secondary" onClick={() => this.example("yaml")}>
+                    YAML
+                  </Button>
+                </React.Fragment>
+              ) : (
+                (this.state.a.types || []).map(type => (
+                  <React.Fragment>
+                    <Button
+                      variant={type === this.state.a.type ? "secondary" : "light"}
+                      onClick={() => {
+                        this.type(type);
+                      }}
+                    >
+                      {type === this.state.a.type && <i className="fa fa-check" />} {types[type].name}
+                    </Button>
+                    <br />
+                  </React.Fragment>
+                ))
+              )}
+            </Col>
+            <Col sm={1} style={{ textAlign: "center", verticalAlign: "center" }}>
+              {types[this.state.a.type].to.map(to => (
+                <React.Fragment>
+                  <Button variant="secondary" onClick={() => this.convert(this.state.a.type, to)}>
+                    {types[to].name}
+                  </Button>
+                  <br />
+                </React.Fragment>
+              ))}
             </Col>
             <Col sm={5}>
               <AceEditor mode={this.state.b.type} theme="textmate" tabSize={2} name={`editor-b`} value={this.state.b.value} readOnly={true} width={"auto"} />
@@ -330,20 +382,6 @@ export class Converter extends Component {
         </Container>
       </React.Fragment>
     );
-  }
-
-  formatType(type) {
-    return {
-      base64: "Base 64",
-      hex: "Hex",
-      json: "JSON",
-      jwt: "JWT",
-      sha1: "SHA-1",
-      sha256: "SHA-256",
-      xml: "XML",
-      yaml: "YAML",
-      url: "URL"
-    }[type];
   }
 }
 
