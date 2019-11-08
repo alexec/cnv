@@ -37,13 +37,13 @@ const examples = {
 const types = {
   base64: { name: "Base 64", to: ["text"] },
   hex: { name: "Hex", to: ["text"] },
-  json: { name: "JSON", to: ["base64", "hex", "sha1", "sha256", "url", "yaml"] },
+  json: { name: "JSON", syntax: true, to: ["base64", "hex", "sha1", "sha256", "url", "yaml"] },
   jwt: { name: "JWT", to: ["json"] },
   sha1: { name: "SHA-1", to: [] },
   sha256: { name: "SHA-256", to: [] },
   text: { name: "Text", to: ["base64", "hex", "sha1", "sha256", "url"] },
-  xml: { name: "XML", to: ["json", "yaml"] },
-  yaml: { name: "YAML", to: ["base64", "hex", "json", "sha1", "sha256", "url"] },
+  xml: { name: "XML", syntax: true, to: ["json", "yaml"] },
+  yaml: { name: "YAML", syntax: true, to: ["base64", "hex", "json", "sha1", "sha256", "url"] },
   url: { name: "URL", to: ["text"] }
 };
 
@@ -55,14 +55,24 @@ export class Converter extends Component {
     const item = this.readFromLocalStorage();
 
     this.state = item || {};
-    this.state.a = this.state.a || blank;
-    this.state.b = this.state.b || blank;
-    this.state.a = typeof this.state.a === "object" ? this.state.a : blank;
-    this.state.b = typeof this.state.b === "object" ? this.state.b : blank;
+    delete this.state.stack;
+    delete this.state.copied;
+    delete this.state.modalIsOpen;
+    if (typeof this.state.a !== "object") {
+      Object.assign(this.state.a, blank);
+    }
+    if (typeof this.state.b !== "object") {
+      Object.assign(this.state.b, blank);
+    }
     this.state.a.type = this.state.a.type || blank.type;
     this.state.b.type = this.state.b.type || blank.type;
     this.state.a.types = this.state.a.types || [this.state.a.type];
     this.state.b.types = this.state.b.types || [this.state.b.type];
+    if (this.state.a.annotations) {
+      if (this.state.a.annotations[0] === null) {
+        delete this.state.a.annotations;
+      }
+    }
   }
 
   readFromLocalStorage() {
@@ -76,16 +86,25 @@ export class Converter extends Component {
   }
 
   detectTypes(text) {
-    const types = [];
-    ["base64", "hex", "url", "json", "jwt", "yaml", "xml"].forEach(type => {
+    const ok = type => {
       try {
-        if (type === "yaml" && (types.includes("jwt") || types.includes("json"))) {
-          throw new Error();
-        }
         convert(text, type, "text");
-        types.push(type);
-      } catch (ignored) {}
-    });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    const types = ["base64", "hex", "jwt", "text", "url"].filter(ok);
+
+    if (text.startsWith("{") || text.startsWith("[")) {
+      types.push("json");
+    } else if (text.startsWith("<")) {
+      types.push("xml");
+    } else {
+      types.push("yaml");
+    }
+
     return types;
   }
 
@@ -96,24 +115,17 @@ export class Converter extends Component {
       this.store(s => {
         s.a.type = from;
         s.b = { value: newText, type: to, types: [to] };
-        s.error = null;
+        delete s.error;
       });
     } catch (e) {
-      this.annotation(text, e);
+      this.annotate(text, e);
     }
   }
 
   annotate(text, e) {
     const annotation = this.annotation(e, text);
     this.store(s => {
-      if (annotation) {
-        s.error = {
-          message: "line " + (annotation.row + 1) + ": " + e.message
-        };
-        s.a.annotations = [annotation];
-      } else {
-        s.error = { message: e.message };
-      }
+      s.a.annotations = [annotation];
     });
   }
 
@@ -128,15 +140,30 @@ export class Converter extends Component {
   type(type) {
     this.store(s => {
       s.a.type = type;
+      delete s.a.annotations;
+      delete s.error;
+      try {
+        convert(s.a.value, s.a.type, s.a.type);
+      } catch (e) {
+        s.a.annotations = [this.annotation(e, s.a.value)];
+      }
     });
   }
 
-  change(val) {
+  change(text) {
     this.store(s => {
-      s.a.value = val;
-      s.a.types = this.detectTypes(val);
-      s.a.annotations = [];
-      s.error = null;
+      s.a.value = text;
+      s.a.types = this.detectTypes(text);
+      if (!s.a.types.includes(s.a.type)) {
+        s.a.type = s.a.types.length > 0 ? s.a.types[0] : "text";
+      }
+      delete s.a.annotations;
+      delete s.error;
+      try {
+        convert(s.a.value, s.a.type, s.a.type);
+      } catch (e) {
+        s.a.annotations = [this.annotation(e, s.a.value)];
+      }
     });
   }
 
@@ -145,16 +172,18 @@ export class Converter extends Component {
       const a = s.a;
       s.a = s.b;
       s.b = a;
-      s.a.annotations = [];
-      s.error = null;
+      delete s.a.annotations;
+      delete s.error;
     });
   }
 
   clear() {
     this.store(s => {
-      s.a = blank;
-      s.b = blank;
-      s.error = null;
+      s.a = {};
+      s.b = {};
+      Object.assign(s.a, blank);
+      Object.assign(s.b, blank);
+      delete s.error;
     });
   }
 
@@ -182,7 +211,12 @@ export class Converter extends Component {
         type: "error"
       };
     }
-    return null;
+    return {
+      row: 1,
+      column: 1,
+      text: e.message,
+      type: "error"
+    };
   }
 
   openModal() {
@@ -200,16 +234,16 @@ export class Converter extends Component {
   example(type) {
     this.store(s => {
       s.a = { value: examples[type], type: type, types: [type] };
-      s.error = null;
+      delete s.error;
     });
   }
 
-  pretty() {
+  format() {
     try {
       const newText = convert(this.state.a.value, this.state.a.type, this.state.a.type);
       this.store(s => {
         s.a.value = newText;
-        s.error = null;
+        delete s.error;
       });
     } catch (e) {
       this.annotate(this.state.a.value, e);
@@ -259,8 +293,8 @@ export class Converter extends Component {
           <Row>
             <Col sm={5}>
               <h4>
-                <Button variant="secondary" onClick={() => this.pretty()}>
-                  <i className="fa fa-code" /> Pretty
+                <Button variant="secondary" onClick={() => this.format()}>
+                  <i className="fa fa-code" /> Format
                 </Button>
                 <span className={"pull-right"}>{types[this.state.a.type].name}</span>
               </h4>
@@ -292,7 +326,7 @@ export class Converter extends Component {
           <Row className="align-items-center">
             <Col sm={5}>
               <AceEditor
-                mode={this.state.a.type}
+                mode={types[this.state.a.type].syntax ? this.state.a.type : "text"}
                 theme="textmate"
                 tabSize={2}
                 name={`editor-a`}
@@ -304,46 +338,28 @@ export class Converter extends Component {
               />
             </Col>
             <Col sm={1} style={{ textAlign: "center", verticalAlign: "center" }}>
-              {this.state.a === blank ? (
+              {this.state.a.value === "" ? (
                 <React.Fragment>
-                  <Button variant="secondary" onClick={() => this.example("base64")}>
-                    Base 64
-                  </Button>
-                  <br />
-                  <Button variant="secondary" onClick={() => this.example("hex")}>
-                    Hex
-                  </Button>
-                  <br />
-                  <Button variant="secondary" onClick={() => this.example("json")}>
-                    JSON
-                  </Button>
-                  <br />
-                  <Button variant="secondary" onClick={() => this.example("jwt")}>
-                    JWT
-                  </Button>
-                  <br />
-                  <Button variant="secondary" onClick={() => this.example("text")}>
-                    Text
-                  </Button>
-                  <br />
-                  <Button variant="secondary" onClick={() => this.example("xml")}>
-                    XML
-                  </Button>
-                  <br />
-                  <Button variant="secondary" onClick={() => this.example("yaml")}>
-                    YAML
-                  </Button>
+                  {["base64", "hex", "json", "jwt", "text", "url", "xml", "yaml"].map(type => (
+                    <React.Fragment>
+                      <Button key={`btn-eg-${type}`} variant="secondary" onClick={() => this.example(type)}>
+                        {types[type].name}
+                      </Button>
+                      <br />
+                    </React.Fragment>
+                  ))}
                 </React.Fragment>
               ) : (
-                (this.state.a.types || []).map(type => (
+                (this.state.a.types || []).map(from => (
                   <React.Fragment>
                     <Button
-                      variant={type === this.state.a.type ? "secondary" : "light"}
+                      key={`btn-from-${from}`}
+                      variant={from === this.state.a.type ? "secondary" : "light"}
                       onClick={() => {
-                        this.type(type);
+                        this.type(from);
                       }}
                     >
-                      {type === this.state.a.type && <i className="fa fa-check" />} {types[type].name}
+                      {from === this.state.a.type && <i className="fa fa-check" />} {types[from].name}
                     </Button>
                     <br />
                   </React.Fragment>
@@ -353,7 +369,7 @@ export class Converter extends Component {
             <Col sm={1} style={{ textAlign: "center", verticalAlign: "center" }}>
               {types[this.state.a.type].to.map(to => (
                 <React.Fragment>
-                  <Button variant="secondary" onClick={() => this.convert(this.state.a.type, to)}>
+                  <Button key={`btn-to-${to}`} variant="secondary" onClick={() => this.convert(this.state.a.type, to)}>
                     {types[to].name}
                   </Button>
                   <br />
@@ -361,7 +377,15 @@ export class Converter extends Component {
               ))}
             </Col>
             <Col sm={5}>
-              <AceEditor mode={this.state.b.type} theme="textmate" tabSize={2} name={`editor-b`} value={this.state.b.value} readOnly={true} width={"auto"} />
+              <AceEditor
+                mode={types[this.state.b.type].syntax ? this.state.b.type : "text"}
+                theme="textmate"
+                tabSize={2}
+                name={`editor-b`}
+                value={this.state.b.value}
+                readOnly={true}
+                width={"auto"}
+              />
             </Col>
           </Row>
         </Container>
