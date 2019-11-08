@@ -56,7 +56,7 @@ export class Converter extends Component {
     const types = [];
     ["base64", "hex", "url", "json", "jwt", "yaml", "xml"].forEach(type => {
       try {
-        if (type === "yaml" && types.includes("json")) {
+        if (type === "yaml" && (types.includes("jwt") || types.includes("json"))) {
           throw new Error();
         }
         convert(text, type, "text");
@@ -75,18 +75,22 @@ export class Converter extends Component {
         s.error = null;
       });
     } catch (e) {
-      const annotation = this.annotation(e, text);
-      this.store(s => {
-        if (annotation) {
-          s.error = {
-            message: "line " + (annotation.row + 1) + ": " + e.message
-          };
-          s.a.annotations = [annotation];
-        } else {
-          s.error = { message: e.message };
-        }
-      });
+      this.annotation(text, e);
     }
+  }
+
+  annotate(text, e) {
+    const annotation = this.annotation(e, text);
+    this.store(s => {
+      if (annotation) {
+        s.error = {
+          message: "line " + (annotation.row + 1) + ": " + e.message
+        };
+        s.a.annotations = [annotation];
+      } else {
+        s.error = { message: e.message };
+      }
+    });
   }
 
   store(fn) {
@@ -217,17 +221,19 @@ export class Converter extends Component {
             </Col>
             <Col sm={5}>
               <h4>
-                <h4>{(this.state.a.types || []).map(type => this.formatType(type)).join(", ")}</h4>
-                <CopyToClipboard
-                  text={this.state.b.value}
-                  onCopy={() => {
-                    toast("Copied to clipboard");
-                  }}
-                >
-                  <Button variant="light" title="Copy to clipboard">
-                    <i className="fa fa-clipboard" /> Copy
-                  </Button>
-                </CopyToClipboard>
+                <h4>
+                  {(this.state.b.types || []).map(type => this.formatType(type)).join(", ")}{" "}
+                  <CopyToClipboard
+                    text={this.state.b.value}
+                    onCopy={() => {
+                      toast("Copied to clipboard");
+                    }}
+                  >
+                    <Button variant="light" title="Copy to clipboard">
+                      <i className="fa fa-clipboard" /> Copy
+                    </Button>
+                  </CopyToClipboard>
+                </h4>
               </h4>
             </Col>
           </Row>
@@ -248,7 +254,7 @@ export class Converter extends Component {
             <Col sm={2} style={{ textAlign: "center", verticalAlign: "center" }}>
               <p>
                 <Button variant="secondary" onClick={() => this.convert(this.state.a.type, this.state.a.type)} title={"Pretty"}>
-                  <i className="fa fa-code" /> Pretty
+                  <i className="fa fa-code" /> Pretty <i className="fa fa-caret-right" />
                 </Button>
               </p>
               <p>
@@ -333,7 +339,7 @@ export class Converter extends Component {
       json: "JSON",
       jwt: "JWT",
       sha1: "SHA-1",
-      sha2356: "SHA-256",
+      sha256: "SHA-256",
       xml: "XML",
       yaml: "YAML",
       url: "URL"
