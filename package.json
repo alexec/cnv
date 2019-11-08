@@ -1,9 +1,9 @@
 {
-  "name": "cnv",
+  "name": "code-chameleon",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Alex Collins <alex_collins@intuit.com>",
-  "license": "MIT",
+  "license": "Apache 2.0",
   "homepage": "https://alexec.github.io/cnv/",
   "devDependencies": {
     "@babel/core": "^7.6.4",
