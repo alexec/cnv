@@ -273,21 +273,19 @@ export class Converter extends Component {
             </Col>
             <Col sm={5}>
               <h4>
-                <h4>
-                  <span>{(this.state.b.types || []).map(type => types[type].name).join(", ")}</span>
-                  <span className={"pull-right"}>
-                    <CopyToClipboard
-                      text={this.state.b.value}
-                      onCopy={() => {
-                        toast("Copied to clipboard");
-                      }}
-                    >
-                      <Button variant="light" title="Copy to clipboard">
-                        <i className="fa fa-clipboard" /> Copy
-                      </Button>
-                    </CopyToClipboard>
-                  </span>
-                </h4>
+                <span>{types[this.state.b.type].name}</span>
+                <span className={"pull-right"}>
+                  <CopyToClipboard
+                    text={this.state.b.value}
+                    onCopy={() => {
+                      toast("Copied to clipboard");
+                    }}
+                  >
+                    <Button variant="light" title="Copy to clipboard">
+                      <i className="fa fa-clipboard" /> Copy
+                    </Button>
+                  </CopyToClipboard>
+                </span>
               </h4>
             </Col>
           </Row>
