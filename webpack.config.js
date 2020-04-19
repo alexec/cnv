@@ -1,6 +1,4 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
-const CspHtmlWebpackPlugin = require("csp-html-webpack-plugin");
 const { BaseHrefWebpackPlugin } = require("base-href-webpack-plugin");
 const path = require("path");
 module.exports = {
@@ -24,28 +22,18 @@ module.exports = {
         }
       },
       {
-        test: /\.scss/,
-        use: ["style-loader", "css-loader", "sass-loader"]
-      },
-      {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"]
       }
     ]
   },
   plugins: [
-    new FaviconsWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
       filename: "./index.html"
     }),
     new BaseHrefWebpackPlugin({
       baseHref: process.env.NODE_ENV === "development" ? "/" : "https://alexec.github.io/cnv/"
-    }),
-    new CspHtmlWebpackPlugin({
-      "object-src": ["https://fonts.googleapis.com"],
-      "script-src": ["'unsafe-inline'", "'self'", "'unsafe-eval'"],
-      "style-src": ["'unsafe-inline'", "'self'", "'unsafe-eval'", "https://stackpath.bootstrapcdn.com"]
     })
   ]
 };
