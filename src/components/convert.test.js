@@ -43,6 +43,10 @@ test("jwt2text-bad", () => {
   expect(() => convert("???", "jwt", "json")).toThrow("invalid JWT");
 });
 
+test("text2text", () => {
+  expect(convert("foo", "text", "text")).toBe("foo");
+});
+
 test("url2text", () => {
   expect(convert("foo%20bar", "url", "text")).toBe("foo bar");
 });

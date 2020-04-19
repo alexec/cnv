@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Alert, Button, Container, Navbar } from "react-bootstrap";
+import { Alert, Button, ButtonGroup, Container, Navbar } from "react-bootstrap";
 import sha1 from "sha1";
 
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -293,9 +293,21 @@ export class Converter extends Component {
           <Row>
             <Col sm={5}>
               <h4>
+              <ButtonGroup>
                 <Button variant="secondary" onClick={() => this.format()}>
                   <i className="fa fa-code" /> Format
                 </Button>
+                  <CopyToClipboard
+                    text={this.state.a.value}
+                    onCopy={() => {
+                      toast("Copied to clipboard");
+                    }}
+                  >
+                    <Button variant="secondary" title="Copy to clipboard">
+                      <i className="fa fa-clipboard" /> Copy
+                    </Button>
+                  </CopyToClipboard>
+                  </ButtonGroup>
                 <span className={"pull-right"}>{types[this.state.a.type].name}</span>
               </h4>
             </Col>
@@ -315,7 +327,7 @@ export class Converter extends Component {
                       toast("Copied to clipboard");
                     }}
                   >
-                    <Button variant="light" title="Copy to clipboard">
+                    <Button variant="secondary" title="Copy to clipboard">
                       <i className="fa fa-clipboard" /> Copy
                     </Button>
                   </CopyToClipboard>
@@ -367,7 +379,7 @@ export class Converter extends Component {
             </Col>
             <Col sm={1} style={{ textAlign: "center", verticalAlign: "center" }}>
               {types[this.state.a.type].to.map(to => (
-                <React.Fragment key={`btn-to-${to}`} >
+                <React.Fragment key={`btn-to-${to}`}>
                   <Button variant="secondary" onClick={() => this.convert(this.state.a.type, to)}>
                     {types[to].name}
                   </Button>
