@@ -341,8 +341,8 @@ export class Converter extends Component {
               {this.state.a.value === "" ? (
                 <React.Fragment>
                   {["base64", "hex", "json", "jwt", "text", "url", "xml", "yaml"].map(type => (
-                    <React.Fragment>
-                      <Button key={`btn-eg-${type}`} variant="secondary" onClick={() => this.example(type)}>
+                    <React.Fragment key={`btn-eg-${type}`}>
+                      <Button variant="secondary" onClick={() => this.example(type)}>
                         {types[type].name}
                       </Button>
                       <br />
@@ -351,9 +351,8 @@ export class Converter extends Component {
                 </React.Fragment>
               ) : (
                 (this.state.a.types || []).map(from => (
-                  <React.Fragment>
+                  <React.Fragment key={`btn-from-${from}`}>
                     <Button
-                      key={`btn-from-${from}`}
                       variant={from === this.state.a.type ? "secondary" : "light"}
                       onClick={() => {
                         this.type(from);
@@ -368,8 +367,8 @@ export class Converter extends Component {
             </Col>
             <Col sm={1} style={{ textAlign: "center", verticalAlign: "center" }}>
               {types[this.state.a.type].to.map(to => (
-                <React.Fragment>
-                  <Button key={`btn-to-${to}`} variant="secondary" onClick={() => this.convert(this.state.a.type, to)}>
+                <React.Fragment key={`btn-to-${to}`} >
+                  <Button variant="secondary" onClick={() => this.convert(this.state.a.type, to)}>
                     {types[to].name}
                   </Button>
                   <br />

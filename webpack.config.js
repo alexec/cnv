@@ -2,7 +2,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { BaseHrefWebpackPlugin } = require("base-href-webpack-plugin");
 const path = require("path");
-module.exports = {
+module.exports = (env, argv) => ({
   entry: path.resolve(__dirname, "src", "index.jsx"),
   devServer: {
     contentBase: path.join(__dirname, "dist")
@@ -35,7 +35,7 @@ module.exports = {
       filename: "./index.html"
     }),
     new BaseHrefWebpackPlugin({
-      baseHref: process.env.NODE_ENV === "development" ? "/" : "https://alexec.github.io/cnv/"
+      baseHref: argv.mode === "development" ? "/" : "https://alexec.github.io/cnv/"
     })
   ]
-};
+});
