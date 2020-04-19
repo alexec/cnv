@@ -1,3 +1,4 @@
+const CopyPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { BaseHrefWebpackPlugin } = require("base-href-webpack-plugin");
 const path = require("path");
@@ -28,6 +29,7 @@ module.exports = {
     ]
   },
   plugins: [
+    new CopyPlugin([{ from: "src/assets", to: "assets" }]),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
       filename: "./index.html"
