@@ -29,7 +29,7 @@ module.exports = (env, argv) => ({
     ]
   },
   plugins: [
-    new CopyPlugin([{ from: "src/assets", to: "assets" }]),
+    new CopyPlugin({ patterns: [{ from: "src/assets", to: "assets" }] }),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
       filename: "./index.html"

@@ -58,11 +58,11 @@ export class Converter extends Component {
     delete this.state.stack;
     delete this.state.copied;
     delete this.state.modalIsOpen;
-    if (typeof this.state.a !== "object") {
-      Object.assign(this.state.a, blank);
+    if (!this.state.a) {
+      this.state.a = blank;
     }
-    if (typeof this.state.b !== "object") {
-      Object.assign(this.state.b, blank);
+    if (!this.state.b) {
+      this.state.b = blank;
     }
     this.state.a.type = this.state.a.type || blank.type;
     this.state.b.type = this.state.b.type || blank.type;
@@ -293,10 +293,10 @@ export class Converter extends Component {
           <Row>
             <Col sm={5}>
               <h4>
-              <ButtonGroup>
-                <Button variant="secondary" onClick={() => this.format()}>
-                  <i className="fa fa-code" /> Format
-                </Button>
+                <ButtonGroup>
+                  <Button variant="secondary" onClick={() => this.format()}>
+                    <i className="fa fa-code" /> Format
+                  </Button>
                   <CopyToClipboard
                     text={this.state.a.value}
                     onCopy={() => {
@@ -307,7 +307,7 @@ export class Converter extends Component {
                       <i className="fa fa-clipboard" /> Copy
                     </Button>
                   </CopyToClipboard>
-                  </ButtonGroup>
+                </ButtonGroup>
                 <span className={"pull-right"}>{types[this.state.a.type].name}</span>
               </h4>
             </Col>
