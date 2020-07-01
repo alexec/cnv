@@ -238,9 +238,9 @@ export class Converter extends Component {
     });
   }
 
-  format() {
+  format(compact = false) {
     try {
-      const newText = convert(this.state.a.value, this.state.a.type, this.state.a.type);
+      const newText = convert(this.state.a.value, this.state.a.type, this.state.a.type, compact);
       this.store(s => {
         s.a.value = newText;
         delete s.error;
@@ -249,7 +249,6 @@ export class Converter extends Component {
       this.annotate(this.state.a.value, e);
     }
   }
-
   render() {
     return (
       <React.Fragment>
@@ -321,6 +320,9 @@ export class Converter extends Component {
               <h4>
                 <span>{types[this.state.b.type].name}</span>
                 <span className={"pull-right"}>
+                  <Button variant="secondary" onClick={() => this.format(true)}>
+                    <i className="fa fa-code" /> Compact
+                  </Button>
                   <CopyToClipboard
                     text={this.state.b.value}
                     onCopy={() => {

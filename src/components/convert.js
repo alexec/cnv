@@ -6,7 +6,7 @@ import { hexDecode, hexEncode } from "./hex";
 
 const sha256 = require("js-sha256").sha256;
 
-export const convert = (text, from, to) => {
+export const convert = (text, from, to, compact = false) => {
   let obj = null;
 
   switch (from) {
@@ -59,7 +59,7 @@ export const convert = (text, from, to) => {
     case "hex":
       return hexEncode(text);
     case "json":
-      return JSON.stringify(obj, null, 2);
+      return JSON.stringify(obj, null, compact ? 0 : 2);
     case "sha1":
       return sha1(text);
     case "sha256":
